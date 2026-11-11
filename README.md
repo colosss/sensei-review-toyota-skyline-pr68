@@ -4,6 +4,10 @@
 
 Полное задание на проверку для агента и участника команды: [AGENT_TASK.md](AGENT_TASK.md).
 
+Готовый пайплайн для Sol + DeepSeek в Zed: [PIPELINE.md](PIPELINE.md). Начало: `python3 scripts/review_pipeline.py preflight`, затем `status`; источники практик — [pipeline/RESEARCH.md](pipeline/RESEARCH.md).
+
+Наблюдения коллеги и план воспроизведения: [CANDIDATES.md](CANDIDATES.md). Протокол координатора: [COORDINATION.md](COORDINATION.md). Схема Sol 6.1 + DeepSeek, инструменты и настройка браузера: [AGENT_SETUP.md](AGENT_SETUP.md). Входящие наблюдения пока не являются подтверждёнными находками.
+
 ## Главное правило: что куда писать
 
 **Исследуем и проверяем вместе здесь; официальное ревью публикуем в исходном PR #68.** Это правило действует и для людей, и для агентов. Инструкции для агентов находятся в корневом [AGENTS.md](AGENTS.md).

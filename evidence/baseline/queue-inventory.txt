@@ -1,0 +1,83 @@
+Validating course index...
+✅ Course index validated successfully (11 courses)
+✅ Course logos available at /courses/logos
+{
+  "routes": [
+    {
+      "path": "/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue/login",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue/status",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue/register",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue/withdraw",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue/shift",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/admin/courses/{course_id}/queue/today",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/admin/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue/set-status",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/admin/courses/{course_id}/queue/snapshot",
+      "methods": [
+        "POST"
+      ]
+    }
+  ],
+  "queue_headers": [
+    "ПОЗИЦИЯ",
+    "ГРУППА",
+    "ФИО",
+    "ЛР",
+    "Пар№",
+    "Статус"
+  ],
+  "history_headers": [
+    "Дата",
+    "ПОЗИЦИЯ",
+    "ГРУППА",
+    "ФИО",
+    "ЛР",
+    "Пар№",
+    "Статус"
+  ],
+  "admin_statuses": [
+    "не_сдал",
+    "нет",
+    "сдал"
+  ]
+}

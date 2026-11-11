@@ -1,0 +1,8 @@
+{
+  "internal_links": "all valid",
+  "finding_locations": "11 checked",
+  "original_repositories": "clean",
+  "source_baseline": "clean",
+  "local_server": "stopped",
+  "containers_started": 0
+}

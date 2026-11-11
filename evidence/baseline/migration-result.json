@@ -1,0 +1,11 @@
+{
+  "branch": "kirill",
+  "findings": 11,
+  "regression_tests_failed_as_expected": 9,
+  "passing_controls": 9,
+  "source_and_scope": "unchanged",
+  "source_initialized": false,
+  "application_checkout_used": "/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/review/source",
+  "committed": false,
+  "pushed": false
+}

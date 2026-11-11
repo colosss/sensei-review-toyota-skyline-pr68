@@ -1,0 +1,19 @@
+
+> courses-front@0.0.0 build
+> vite build
+
+vite v6.3.5 building for production...
+transforming...
+src/pages/SchedulePage.jsx (18:2): "TabList" is not exported by "node_modules/@mui/material/esm/index.js", imported by "src/pages/SchedulePage.jsx".
+✓ 4191 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                     0.75 kB │ gzip:   0.51 kB
+dist/assets/index-nWBheqGc.css      0.34 kB │ gzip:   0.22 kB
+dist/assets/index-CF2nrC2I.js   1,530.34 kB │ gzip: 478.76 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.35s

@@ -1,0 +1,278 @@
+FFFFFFFFF.........                                                       [100%]
+=================================== FAILURES ===================================
+________________ test_R01_failed_ci_must_not_allow_registration ________________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R01/test_R01.py:16: in test_R01_failed_ci_must_not_allow_registration
+    assert result.status_code == 400, "0/1 passed is a nonempty string, not a successful verdict"
+E   AssertionError: 0/1 passed is a nonempty string, not a successful verdict
+E   assert 200 == 400
+E    +  where 200 = <Response [200 OK]>.status_code
+----------------------------- Captured stdout call -----------------------------
+failed CI, stored x: 200 {'position': 1, 'queue_size': 1}
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab1-alice
+2026-11-11 21:15:44 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:44 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:44 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Relevant job: test (conclusion: failure)
+2026-11-11 21:15:44 - grading.grader - INFO - Successful runs for TASKID extraction: 0
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab1-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: failure)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 0
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+_______________ test_R02_registration_must_not_write_grade_cells _______________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R02/test_R02.py:17: in test_R02_registration_must_not_write_grade_cells
+    assert ws.writes == [], "queue registration must not write to existing grade cells"
+E   AssertionError: queue registration must not write to existing grade cells
+E   assert [(3, 4, 'v')] == []
+E     
+E     Left contains one more item: (3, 4, 'v')
+E     Use -v to get more diff
+----------------------------- Captured stdout call -----------------------------
+register: 200 {'position': 1, 'queue_size': 1} grade writes: [(3, 4, 'v')]
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab1-alice
+2026-11-11 21:15:44 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:44 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:44 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:44 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab1-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+__________________ test_R03_only_one_active_entry_across_labs __________________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R03/test_R03.py:16: in test_R03_only_one_active_entry_across_labs
+    assert second.status_code == 409, "one student cannot wait for two labs simultaneously"
+E   AssertionError: one student cannot wait for two labs simultaneously
+E   assert 200 == 409
+E    +  where 200 = <Response [200 OK]>.status_code
+----------------------------- Captured stdout call -----------------------------
+two lab registrations: 200 {'position': 1, 'queue_size': 1} 200 {'position': 1, 'queue_size': 1}
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab1-alice
+2026-11-11 21:15:44 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:44 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:44 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:44 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:44 - grading.bulk - WARNING - Update rejected: cell already contains 'v'
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab2-alice
+2026-11-11 21:15:44 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:44 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:44 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:44 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:44 - grading.bulk - WARNING - Update rejected: cell already contains 'v'
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/2/queue/register "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab1-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+WARNING  grading.bulk:bulk.py:339 Update rejected: cell already contains 'v'
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab2-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+WARNING  grading.bulk:bulk.py:339 Update rejected: cell already contains 'v'
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/2/queue/register "HTTP/1.1 200 OK"
+__________ test_R04_finishing_first_student_renumbers_remaining_queue __________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R04/test_R04.py:22: in test_R04_finishing_first_student_renumbers_remaining_queue
+    assert [r.position for r in waiting] == [1, 2], "positions must not both be 2"
+E   AssertionError: positions must not both be 2
+E   assert [2, 2] == [1, 2]
+E     
+E     At index 0 diff: 2 != 1
+E     Use -v to get more diff
+----------------------------- Captured stdout call -----------------------------
+after completion: [('Bob Synthetic', 2), ('Carol Synthetic', 2)]
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/admin/courses/review/groups/G1/labs/1/queue/set-status "HTTP/1.1 200 OK"
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab1-carol
+2026-11-11 21:15:44 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:44 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:44 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:44 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:44 - grading.bulk - WARNING - Update rejected: cell already contains 'v'
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/admin/courses/review/groups/G1/labs/1/queue/set-status "HTTP/1.1 200 OK"
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab1-carol
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+WARNING  grading.bulk:bulk.py:339 Update rejected: cell already contains 'v'
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+__________ test_R05_waiting_entry_remains_visible_after_class[status] __________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R05/test_R05.py:22: in test_R05_waiting_entry_remains_visible_after_class
+    assert result.json()["in_queue"] is True
+E   assert False is True
+----------------------------- Captured stdout call -----------------------------
+after class: status 200 {'in_queue': False, 'position': None, 'queue_size': 0, 'ci_status': 'unknown', 'can_register': False, 'already_passed': False, 'is_team_lab': False, 'team': None, 'queue_open': False, 'session': None, 'next_session': None, 'session_required': False}
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab1-alice
+2026-11-11 21:15:44 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:44 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:44 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:44 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:44 - grading.bulk - WARNING - Update rejected: cell already contains 'v'
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 403 Forbidden"
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue/status "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab1-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+WARNING  grading.bulk:bulk.py:339 Update rejected: cell already contains 'v'
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 403 Forbidden"
+INFO     httpx:_client.py:1025 HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue/status "HTTP/1.1 200 OK"
+___________ test_R05_waiting_entry_remains_visible_after_class[list] ___________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R05/test_R05.py:24: in test_R05_waiting_entry_remains_visible_after_class
+    assert result.json()["size"] == 1
+E   assert 0 == 1
+----------------------------- Captured stdout call -----------------------------
+after class: list 200 {'queue': [], 'size': 0, 'is_team_lab': False, 'queue_open': False}
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab1-alice
+2026-11-11 21:15:44 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:44 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:44 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:44 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:44 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:44 - grading.bulk - WARNING - Update rejected: cell already contains 'v'
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 403 Forbidden"
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab1-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+WARNING  grading.bulk:bulk.py:339 Update rejected: cell already contains 'v'
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 403 Forbidden"
+INFO     httpx:_client.py:1025 HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue "HTTP/1.1 200 OK"
+______________ test_R06_without_schedule_queue_lives_for_the_day _______________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R06/test_R06.py:16: in test_R06_without_schedule_queue_lives_for_the_day
+    assert result.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <Response [403 Forbidden]>.status_code
+----------------------------- Captured stdout call -----------------------------
+without schedule: {'in_queue': False, 'position': None, 'queue_size': 0, 'ci_status': 'unknown', 'can_register': False, 'already_passed': False, 'is_team_lab': False, 'team': None, 'queue_open': False, 'session': None, 'next_session': None, 'session_required': False} 403 {'detail': 'QUEUE_CLOSED'}
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue/status "HTTP/1.1 200 OK"
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 403 Forbidden"
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue/status "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 403 Forbidden"
+_________________ test_R07_registered_schedule_module_is_used __________________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R07/test_R07.py:33: in test_R07_registered_schedule_module_is_used
+    assert isinstance(sources["G1"], ReviewUniversity)
+E   AssertionError: assert False
+E    +  where False = isinstance(<grading.schedule.manual.ManualScheduleSource object at 0x10ca4d8c0>, <class 'test_R07.test_R07_registered_schedule_module_is_used.<locals>.ReviewUniversity'>)
+----------------------------- Captured stdout call -----------------------------
+source selected: ManualScheduleSource module calls: []
+________________ test_R09_list_order_matches_shifted_positions _________________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R09/test_R09.py:18: in test_R09_list_order_matches_shifted_positions
+    assert [r["fio"] for r in data["queue"]] == ["Bob Synthetic", "Alice Synthetic"]
+E   AssertionError: assert ['Alice Synth...ob Synthetic'] == ['Bob Synthet...ce Synthetic']
+E     
+E     At index 0 diff: 'Alice Synthetic' != 'Bob Synthetic'
+E     Use -v to get more diff
+----------------------------- Captured stdout call -----------------------------
+API after shift: [('Alice Synthetic', 2), ('Bob Synthetic', 1)]
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 21:15:44 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/shift "HTTP/1.1 200 OK"
+2026-11-11 21:15:44 - httpx - INFO - HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/shift "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1025 HTTP Request: GET http://testserver/courses/review/groups/G1/labs/1/queue "HTTP/1.1 200 OK"
+=============================== warnings summary ===============================
+../../../Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/slowapi/extension.py:720: 43 warnings
+  /Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/slowapi/extension.py:720: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED repro/R01/test_R01.py::test_R01_failed_ci_must_not_allow_registration
+FAILED repro/R02/test_R02.py::test_R02_registration_must_not_write_grade_cells
+FAILED repro/R03/test_R03.py::test_R03_only_one_active_entry_across_labs - As...
+FAILED repro/R04/test_R04.py::test_R04_finishing_first_student_renumbers_remaining_queue
+FAILED repro/R05/test_R05.py::test_R05_waiting_entry_remains_visible_after_class[status]
+FAILED repro/R05/test_R05.py::test_R05_waiting_entry_remains_visible_after_class[list]
+FAILED repro/R06/test_R06.py::test_R06_without_schedule_queue_lives_for_the_day
+FAILED repro/R07/test_R07.py::test_R07_registered_schedule_module_is_used - A...
+FAILED repro/R09/test_R09.py::test_R09_list_order_matches_shifted_positions
+9 failed, 9 passed, 44 warnings in 0.09s

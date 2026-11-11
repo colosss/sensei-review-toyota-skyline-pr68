@@ -1,0 +1,52 @@
+C06 independent review (list scope) — requirement, base, objection
+Actor: deepseek-order2-V. SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d.
+
+Scope accepted here: GET .../groups/{group}/labs/{lab}/queue returns the whole
+day sheet instead of the requested group/lab queue. This verification does NOT
+accept "historical/withdrawn position" as a separate C06 defect; positions that
+look duplicated are treated only as a consequence of the unscoped list.
+
+Requirement / real path
+- Route docstring: "List the active queue for a group and lab"
+  (source/main.py:3416-3419).
+- The UI calls that exact path with courseId/groupId/labId
+  (source/frontend/courses-front/src/api/index.js:45-46,88-92).
+- The list handler reads all rows of the day sheet
+  (main.py:3430-3431) and returns every row unchanged
+  (main.py:3433-3444); group_id/lab_id are never applied to the rows.
+- queue_status, by contrast, computes queue_size/position for group+lab
+  (main.py:3101,3169,3211-3214); the list does not display group/lab labels
+  for foreign rows (QueueSection.jsx:330,349-353).
+
+Observed contract violation
+- Lab1 page returns labs ['ЛР1','ЛР2','ЛР1'] with positions [2,1,1] while the
+  same page's status says 2 of 2. The second observation shows another group's
+  row leaking into the page. Real HTTP endpoints; only Sheets/CI/session seams
+  are synthetic.
+
+Base comparison (independent)
+- git cat-file base:grading/queue/store.py -> exit 128 (queue package absent).
+- base main.py has zero queue route matches; diff base..pinned adds
+  store.py +678, main.py +1248/-13, QueueSection.jsx +368, api/index.js +67/-1.
+- The unscoped list is introduced by this PR, not inherited.
+
+Strongest reasonable objection
+"The daily queue sheet is one teacher-facing queue for the whole day; returning
+all rows is intentional, and duplicate/historical positions are not a defect."
+
+Answer
+- The endpoint is documented and called as a group+lab queue; the UI renders
+  the answer as this lab's queue and does not mark foreign lab/group rows.
+  Returning all rows contradicts the docstring and makes the same page's
+  position/queue_size (computed for group+lab) incoherent with its list.
+- The observation confirms the concrete mismatch [2,1,1] vs "2 of 2" and a
+  cross-group leak. If a whole-day teacher queue were intended, the API would
+  need a distinct route/label; that is not what the UI calls.
+- Per instruction, I do not split out historical-position uniqueness as an
+  independent bug. The withdrawn row's stale position is a consequence of
+  returning non-scoped/all-status rows; the separate Q01/Q02 causes are not
+  merged into this packet.
+
+Limits: synthetic Sheets + TestClient, fixed day; no real Sheets/browser/
+network. The test's screenshot chain is a synthetic reconstruction, not proof
+of the original screenshot identities/actions.

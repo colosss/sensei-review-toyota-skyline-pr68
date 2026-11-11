@@ -1,0 +1,198 @@
+D01 — contract caveats and audit of what the packet may claim
+Author-audit (I am the D01 author; independent verification was done by another actor).
+Pinned SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Base: eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39
+
+Existing test inputs and receipts are intentionally unchanged:
+  repro/D01/test_d01_snapshot.py
+  scratch/pipeline/D01/runs/f74001aa260d443481d4aa4a1d99dc48.json
+  evidence/D01/README.md, evidence/D01/test-output.txt
+
+===============================================================================
+1. What the source itself claims
+===============================================================================
+
+source/grading/queue/store.py:584-593 (snapshot_sheet docstring):
+
+  "Atomically append a day's rows to history and delete its queue tab.
+
+   Idempotent: existing history rows are matched as a multiset by
+   (date, group, fio, lab, session). Repeated registrations are retained,
+   while a retry after a partial failure does not duplicate rows.
+
+   The append and delete are sent as a single batch_update call
+   (two requests: appendCells + deleteSheet) so they are atomic
+   from the Sheets API perspective."
+
+Two consequences, both authoritative for this audit:
+
+  (a) appendCells and deleteSheet are one atomic batch. The outcome
+      "history appended, tab still present" is NOT a reachable outcome of
+      that batch; a batch either applies both requests or neither.
+  (b) "a retry after a partial failure" therefore cannot mean "the batch
+      applied appendCells but not deleteSheet"; that sentence has no
+      reachable trigger inside snapshot_sheet.
+
+===============================================================================
+2. The "partial append + delete failure" control is NOT real support
+===============================================================================
+
+repro/D01/test_d01_snapshot.py:192-212
+  test_control_retry_after_partial_append_has_no_loss_and_no_duplicates
+
+It sets fake fail_mode = "before_delete": the fake applies appendCells,
+then raises instead of applying deleteSheet. That fabricates the state
+"history has the rows, tab remains" *inside one batch_update*, which the
+atomic batch described in the docstring cannot produce.
+
+Therefore:
+  * Do NOT present this control as evidence that a real partial Sheets
+    batch is supported, or that the production retry recovers from such a
+    partial batch. That failure mode does not exist under the code's own
+    atomicity model.
+  * Do NOT quote the docstring's "retry after a partial failure" promise
+    as verified. The control only exercises the multiset/idempotency code
+    on a synthetic state; it does not verify any real failure mechanism.
+  * The state itself is representable in production by a different
+    mechanism (e.g. the Apps Script appends rows to history and then aborts
+    on its "sheet changed" check, leaving the tab). That mechanism was not
+    tested. The control may be kept as a unit-level idempotency check with
+    that framing only, or removed from the review narrative entirely.
+
+What the control does still legitimately show (keep the claim narrow):
+  given history rows already present for the date and the tab still open,
+  snapshot_sheet appends no duplicates and then deletes the tab. That is a
+  pure synthetic-state property of _read_history_counts_for_date /
+  seen_counts, not proof of a real partial-batch path.
+
+Note on the independent verification (deepseek-final-V, verification.json):
+  its failure_reason_check already says the regression "does not depend on
+  sleeps or on a partial batch" and that a silent partial appendCells is not
+  claimed. Keep that statement. The only additional rule here: do not present
+  the before_delete control in the final review as evidence that a real
+  partial Sheets batch is handled in production, and do not repeat the
+  docstring's "retry after a partial failure" as a verified promise.
+
+===============================================================================
+3. What remains a real regression, independent of that control
+===============================================================================
+
+The two failing tests do not use fail_mode at all. They inject an external
+write after snapshot_sheet has read the tab and before the batch is applied:
+
+  repro/D01/test_d01_snapshot.py:252-272
+    test_regression_close_must_not_drop_row_added_after_read
+      late row appended by a teacher/script after the read
+      -> history has only the pre-read rows, tab is deleted
+
+  repro/D01/test_d01_snapshot.py:275-296
+    test_regression_late_status_change_must_not_be_archived_stale
+      status changed to "сдал" after the read
+      -> history archives "не_дошло", tab is deleted
+
+The injection point (inside the fake's batch_update, before applying the
+requests) is only a deterministic way to schedule the write between
+`read_queue_rows` (store.py:606) and `spreadsheet.batch_update`
+(store.py:664). The logical order is: read -> external write -> batch
+applied. The batch's atomicity covers its own two requests; it says nothing
+about a write that happened before the batch started. This is exactly the
+case documented for both closers:
+
+  source/docs/SETUP.md:97-105
+    "Обе стороны выполняют одну и ту же идемпотентную операцию ...
+     4. проверить, что все строки очереди есть в истории;
+     5. удалить лист очереди, только если он не менялся с момента чтения."
+
+  source/docs/SETUP.md:129-130
+    "Лист изменился во время закрытия. В лист прошлой даты кто-то писал
+     во время копирования. Лист не удалён, следующий запуск добавит
+     недостающие строки и закроет его."
+
+  source/queue-apps-script/Code.gs:156-169 implements steps 4 and 5
+    (readHistoryCounts_ after append; JSON comparison of readQueueRows_).
+
+  source/docs/hackathon/ADR-queue-storage.md:110-113 supports direct manual
+    work with the sheet by the teacher.
+
+snapshot_sheet implements neither step 4 (no post-append completeness read)
+nor step 5 (no re-read of the tab before deleteSheet). That is the defect.
+
+Separations the final review must keep:
+  * Atomic batch != consistent read-then-delete. Atomicity is about the two
+    requests, not about the tab's state since the earlier read.
+  * The two regressions are independent of the impossible partial control.
+    Cite only the standalone nodeids in section 5.
+
+===============================================================================
+4. Re-read before delete is not CAS; do not promise a full guarantee
+===============================================================================
+
+Even after adding a re-read immediately before the batch, an external writer
+can still land between that re-read and the server applying the batch, and
+Google Sheets offers no compare-and-set / conditional delete for this path.
+A re-read narrows the window; it does not eliminate it.
+
+Required wording for any finding/fix request:
+  * ask for the documented best-effort check (step 5) and the completeness
+    check (step 4), not for perfect atomicity;
+  * say explicitly that a residual window remains and cannot be fully
+    closed with the Sheets API;
+  * do not claim "the loss is impossible after the fix"; claim "the
+    documented guard is present and the window is reduced".
+
+Related gap, do NOT claim as a separate reproduced defect:
+  * SETUP step 2 asks both sides to take copy_lease; the backend never
+    touches autoclose_status. This widens the backend-vs-script overlap, but
+    the cross-system race was not reproduced and the docs call overlapping
+    closers practically impossible ("Ночью записи в очередь невозможны",
+    SETUP.md:108). Keep it as a note, not a second finding.
+
+===============================================================================
+5. Standalone regression nodeids (the only regression evidence to cite)
+===============================================================================
+
+repro/D01/test_d01_snapshot.py::test_regression_close_must_not_drop_row_added_after_read
+repro/D01/test_d01_snapshot.py::test_regression_late_status_change_must_not_be_archived_stale
+
+Both can be run alone:
+  .venv/bin/python scripts/run_review_tests.py \
+    repro/D01/test_d01_snapshot.py::test_regression_close_must_not_drop_row_added_after_read \
+    -v --tb=short
+
+They fail on the pinned code for the missing step 5, with the real
+`snapshot_sheet` and no fail_mode; the output states the archived FIOs and
+`tab still present=False`, or the stale archived status.
+
+===============================================================================
+6. Requirement sufficiency and recommendation
+===============================================================================
+
+Sufficient requirement exists for the missing-check contract:
+  * SETUP.md:97-105 addresses both closers and names the exact check;
+  * SETUP.md:129-130 defines the expected behaviour for the changed-tab case;
+  * Code.gs:156-169 is the in-repo reference implementation of that check;
+  * ADR:110-113 makes manual teacher edits a supported way to work.
+
+So D01 should NOT be blocked on "there is no requirement". It should be
+reported as a contract violation: the backend promises (and the script
+implements) a best-effort "tab unchanged since read" guard that the backend
+omits.
+
+Honest limitation on impact (strongest objection):
+  * Loss requires an external writer (teacher or script) to touch a past-day
+    tab in the window between the backend read and its batch. The backend's
+    own endpoints only write today's tab, and SETUP.md:108 says night writes
+    to the queue do not happen, so the authors can call the flow unusual.
+  * Counter: SETUP.md:129-130 explicitly covers "someone wrote during
+    copying", ADR supports manual edits, and the lazy close runs at the
+    first request of the new day, which can be while the teacher still
+    edits yesterday's tab.
+  * Severity should therefore be stated as limited (narrow interleaving,
+    but permanent loss in an append-only archive), not as a failure of the
+    normal daytime class flow.
+
+Concrete conclusion: report D01, medium/low severity, with the wording
+limits above. Do not cite the partial-batch control. Do not promise a full
+fix. If the review bar is "material loss in a flow the backend alone can
+produce", this finding does not meet that bar and should be dropped; the
+missing re-read is then only a documentation/robustness gap.

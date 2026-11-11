@@ -1,0 +1,12 @@
+C05 coordinator browser observation — sol-browser, SHA 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+
+Executed unchanged repro/C05/browser_stale_reload.js via browser_run_code_unsafe(filename), after pause, on a fresh reset synthetic fixture and cleared cookies.
+
+Actual ordering:
+1. Pre-join real GET /queue returned only Petrova position1. Its unchanged body was held by Playwright.
+2. Join completed; latest reload rendered success notice, position2 of2, Petrova+Ivanov, Withdraw button.
+3. Released the old GET response. UI kept success notice but removed Ivanov and own position and offered Join again.
+4. Synthetic storage still contained Petrova pos1 and Ivanov pos2, both waiting.
+5. One manual Refresh restored Ivanov, position2 of2 and Withdraw.
+
+No response content forged; managed request completion order only. Real pinned frontend and backend mutation paths; fake Sheets/GitHub/CI/window. Dist served API base rewritten in transit to loopback (see repro/C01/README.md). No production, real Sheets latency or colleague original trigger established. Backend cache TTL is not the cause of this particular scenario. This is an observed browser scenario, not a passing regression asserting the desired contract. Author screenshot browser-confirmed-but-missing.png is from the preceding session; independent verifier captured verification-stale.png in a fresh repeat. No cookie/token/headers retained.

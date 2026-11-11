@@ -1,0 +1,50 @@
+Q03 independent review — same FIO, distinct authenticated login
+Actor: deepseek-final-V. SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d.
+
+Requirement / real path
+- source/grading/queue/sheets_context.py:60-77 resolves the authenticated
+  username against the roster GitHub column; each roster row is a distinct
+  person, and the resulting fio is only a display name.
+- source/main.py:3344-3347 (withdraw) and :3392-3395 (shift) resolve the
+  session username to ctx.fio, then call store.withdraw/shift with that fio
+  (main.py:3357 and :3404-3405).
+- source/grading/queue/store.py:448-452 matches withdraw rows by
+  (group, lab, fio); :491 uses _unique_row on the same fio key.
+- The queue schema stores only FIO, not GitHub (store.py:17,40), so two rows
+  with the same FIO collapse into one mutable queue identity.
+- Test fixture: two roster rows FIO "Иванов Иван" with GitHub
+  c06-ivanov-a/c06-ivanov-b, plus "Петрова Анна" as a distinct-FIO control.
+  B's student_session is signed by the app's own build_student_session with B's
+  own username; no public /register and no A credentials are used.
+
+Observed violation
+- B withdraws: HTTP 200, A's waiting row becomes "отозван".
+- B shifts by 1: HTTP 200, A moves from position 1 to 2 behind Петрова.
+- Control with a different FIO (Петрова) changes only Петрова's row. Thus the
+  failure is the same-FIO collision, not a general absence of authorization.
+
+Base comparison (independent)
+- base:grading/queue/store.py absent (cat-file exit 128); base main.py has zero
+  queue route matches. The queue schema and routes are introduced by this PR.
+
+Strongest reasonable objections
+1) "The queue is keyed by FIO by design, so namesakes are inherently the same
+   queue participant; B's action is not impersonation."
+2) "The signed test cookie could be seen as impersonation of A, or as a C04
+   duplicate."
+Answer
+- The roster distinguishes the two people by GitHub login and the app
+  authenticates B as B; it then deliberately discards the GitHub identity and
+  keys mutations on FIO. The distinct-FIO control shows the intended rule is
+  "mutate the authenticated student's own row". ADR-queue-storage.md:20-25 says
+  a student sees their own position/status; collapsing two real students into
+  one row violates that.
+- The cookie is created by the application signer with B's own username via
+  build_student_session, modeling a completed reliable OAuth; the test never
+  calls the public registration or claims A's login. This is not C04's public
+  re-registration/impersonation path. No GitHub account takeover is claimed.
+- The test intentionally accepts any non-2xx rejection (not a fixed 403/404);
+  the asserted contract is that A's row is unchanged.
+
+Limits: synthetic roster/Sheets + TestClient; real OAuth/GitHub/Sheets not used;
+a fix may require a stable identity column in the queue schema.

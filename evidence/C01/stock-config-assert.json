@@ -1,0 +1,13 @@
+{
+  "compose_frontend_ports": [
+    "8080:80"
+  ],
+  "nginx_listen": true,
+  "nginx_has_api_proxy": false,
+  "dockerfile_exposes_8080": true,
+  "vite_dev_proxy_only": true,
+  "frontend_default_api_base": true,
+  "compose_identical_to_base": true,
+  "nginx_identical_to_base": true,
+  "base": "eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39"
+}

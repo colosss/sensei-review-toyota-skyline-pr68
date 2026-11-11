@@ -1,0 +1,93 @@
+# C07 requirement sources (SHA 20bea22cf4a1cbc19634a984883ff52764ce9d6d)
+
+## docs/hackathon/ADR-queue-storage.md — decision: teacher works in the sheet
+    75	### Вариант 3: Google Sheets (выбран)
+    76	
+    77	Ежедневный лист `Очередь-YYYY-MM-DD` в таблице курса. Лист
+    78	`История_очереди` — append-only архив. Backend читает и пишет через
+    79	gspread, кеширует чтение в памяти с TTL 30 секунд
+    80	(`grading/queue/cache.py`). Мьютекс `sheet_lock(spreadsheet_id)`
+    81	(`grading/queue/locks.py`) сериализует мутации.
+    82	
+   106	Выбран **вариант 3 (Google Sheets)**.
+   107	
+   108	Главная причина: проект уже хранит оценки в Google Sheets, и очередь
+   109	на защиту — часть того же учебного процесса. Добавление SQLite или
+   110	другого хранилища создавало бы второй источник правды, требовало
+   111	синхронизации и усложняло развёртывание. Преподаватель работает с
+   112	таблицей напрямую — filter views, dropdown для статусов, ручное
+   113	редактирование — и не должен учить отдельный интерфейс.
+   114	
+   115	Кеш (`grading/queue/cache.py`) с TTL 30 секунд снижает количество
+   116	обращений к API. Мьютекс (`grading/queue/locks.py`) гарантирует, что
+   117	мутации внутри одного процесса сериализованы.
+   118	
+   119	## Последствия
+   120	
+   121	### Что становится проще
+   122	
+   123	- Преподаватель видит очередь в знакомом интерфейсе Google Sheets.
+   124	- Архив — простой append-only лист, не нужна отдельная БД для истории.
+   125	- Filter views по статусам («Все ждёт», «Сдано», «Не сдал») и парам
+   126	  («Пара 1»–«Пара 6») — создаются автоматически при открытии листа.
+   127	- Data validation (dropdown) на колонке «Статус» — преподаватель
+   128	  выбирает из списка, опечатки исключены.
+   129	- Apps Script (`apps-script/Code.gs`) автоматизирует закрытие дня и
+   130	  очистку conflict-листов — не требует backend.
+
+## ADR — who writes: students vs teacher
+    18	поддерживать два источника правды.
+    19	
+    20	- **Что хранить:** дневная очередь (позиция, группа, ФИО, ЛР, № пары,
+    21	  статус) и архив (то же + дата). Очередь живёт до конца дня, архив —
+    22	  навсегда.
+    23	- **Кто читает:** студенты — свой статус и позицию (часто, при каждом
+    24	  обновлении страницы); преподаватель — весь список очереди (постоянно
+    25	  во время занятия).
+    26	- **Кто пишет:** студенты — записываются, выходят, сдвигаются
+    27	  (несколько раз за занятие); преподаватель — отмечает результат защиты
+    28	  (для каждого студента один раз в конце).
+    29	- **Ограничения:** backend запущен в одном процессе (один gunicorn
+    30	  worker, см. `docker-compose.yml`); внешние API — GitHub и Google
+    31	  Sheets, у последнего квота ~60 запросов/мин на проект; хранилище
+    32	  данных не развёрнуто (нет PostgreSQL/SQLite volume); курс
+
+## Read-only teacher UI comment
+    32	/**
+    33	 * Read-only defense queue viewer for teachers.
+    34	 *
+    35	 * The teacher picks a group (required by the backend URL) and sees the
+    36	 * full daily queue sheet — all groups, all statuses. No action buttons:
+    37	 * status changes happen in the Google Sheet directly.
+    38	 */
+    39	// eslint-disable-next-line react/prop-types
+    40	export const QueueViewDialog = ({ courseId, lab, onClose }) => {
+
+## Admin API that does exist (not surfaced as UI actions by design)
+  3453	@app.get("/admin/courses/{course_id}/queue/today")
+  3454	@limiter.limit("30/minute")
+  3455	def admin_queue_today(
+  3456	    request: Request,
+  3457	    course_id: str,
+  3458	    admin: str = Depends(require_admin),
+  3459	):
+  3507	@app.post("/admin/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue/set-status")
+  3508	@limiter.limit("30/minute")
+  3509	def queue_set_status(
+  3510	    request: Request,
+  3511	    course_id: str,
+  3512	    group_id: str,
+  3513	    lab_id: str,
+  3514	    body: QueueSetStatusRequest,
+  3515	    admin: str = Depends(require_admin),
+  3516	):
+  3517	    """Mark a student's or team's queue entry with a defense result."""
+  3541	@app.post("/admin/courses/{course_id}/queue/snapshot")
+  3542	@limiter.limit("10/minute")
+  3543	def queue_snapshot(
+  3544	    request: Request,
+  3545	    course_id: str,
+  3546	    admin: str = Depends(require_admin),
+  3547	):
+  3548	    """Manually snapshot past-day queue sheets to history and delete them."""
+  3549	    admin = _ensure_admin_resolved(request, admin)

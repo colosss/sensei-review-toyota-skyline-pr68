@@ -1,0 +1,53 @@
+D01 independent review — requirement, base, objection (external teacher write)
+Actor: deepseek-final-V. SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d.
+
+Requirement / real path
+- source/docs/SETUP.md:97-105 defines one idempotent operation for script and
+  backend, including step 4 "проверить, что все строки очереди есть в истории"
+  and step 5 "удалить лист очереди, только если он не менялся с момента
+  чтения".
+- source/docs/SETUP.md:129-130 explicitly handles "лист изменился во время
+  закрытия": the tab is not deleted and the next run adds the missing rows.
+- source/docs/hackathon/ADR-queue-storage.md:110-113 says the teacher works
+  directly in Google Sheets (manual editing is a stated feature).
+- source/queue-apps-script/Code.gs:156-169 implements completeness verification
+  and a re-read comparison before deleteSheet.
+- source/grading/queue/store.py:606 reads the tab, :638-663 builds appendCells
+  and deleteSheet, :664 sends one batch_update; there is no re-read between the
+  read and delete.
+- The test calls the real snapshot_sheet/maybe_snapshot_past_days with an
+  in-memory gspread-shaped workbook only.
+
+Observed violation
+- A row or status written after the read is not archived and the tab is deleted.
+  Controls (append-before-delete failure, full batch failure, retry, idempotency,
+  today/future tabs, status mapping) pass, so this is specifically the
+  changed-during-close branch.
+
+Base comparison (independent)
+- base:grading/queue/store.py, base:docs/SETUP.md and
+  base:queue-apps-script/Code.gs all return cat-file exit 128 (absent in
+  eef98bb3). base main.py has zero queue route matches. The archive path and
+  its reference script are introduced by this PR.
+
+Strongest reasonable objection: is an external teacher write to a past-day tab
+during archival actually supported?
+- Objection: SETUP.md:108 says queue writes at night are impossible, the
+  backend closes lazily; the ADR's teacher editing may mean the current queue
+  tab, not a past-day tab being archived. The test injects the write inside a
+  fake batch_update, which is not a real Google operation.
+- Answer: the support is explicit in this PR's own documentation, not assumed.
+  SETUP.md:97-105 states the contract for both closers, and :129-130 explicitly
+  names the changed-during-close case and promises the tab will be kept.
+  Code.gs:165-168 implements exactly that guard, so the backend is the deviating
+  side. ADR:110-113 makes direct teacher editing a stated feature.
+- The test does not rely on an impossible partial batch: the hook runs before
+  the fake applies any request, which models a write landing after the backend's
+  read and before the batch starts. Google's batch being atomic does not remove
+  that window; the missing re-read/compare is the defect. A silent partial
+  appendCells is explicitly NOT claimed as a separate defect.
+- The short window and the fact that production timing was not measured are
+  real limits of evidence, but they do not refute the documented contract.
+
+Limits: in-memory fake, no real Sheets/Apps Script/network; no restart timing
+test; multi-worker is not claimed.

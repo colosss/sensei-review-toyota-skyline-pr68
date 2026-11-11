@@ -1,0 +1,3 @@
+OK source: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+OK source/vendor/suai-schedule-parser: 6ee99733d766ab6f746403996a7a4bef28d6443c
+Baseline is pinned and clean. Application behavior has not been tested.

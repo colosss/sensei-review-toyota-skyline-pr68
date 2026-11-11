@@ -1,0 +1,3 @@
+NOTE nginx has no /api proxy; the student path uses the absolute API base URL, so this is not a failure criterion.
+EXPECTED frontend publish mapping to match nginx listen 8080 (e.g. 8080:8080); ACTUAL ['8080:80']; nginx listens 8080, so container port 80 has no listener
+assert_exit=1

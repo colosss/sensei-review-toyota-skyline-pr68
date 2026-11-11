@@ -1,0 +1,90 @@
+C05 independent browser verification — actor deepseek-c05-V
+SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Mode: scenario / manual browser observation. Receipt absent by design for browser.
+Stand: synthetic C01 harness at 127.0.0.1:18281 (UI) / 18280 (API), owned by
+Sol; I did not start, stop or edit the harness.
+
+## Executed author script unchanged
+
+Tool: browser_run_code_unsafe with filename
+/home/mifugi/it/labgrader-hackathon/sensei-review-toyota-skyline-pr68/repro/C05/browser_stale_reload.js
+(the script itself calls POST /__harness__/reset and page.context().clearCookies()).
+
+Intervention: the script holds one real pre-join GET `/queue` (response bytes
+unchanged), allows the post-join reload to render, then releases the old
+response. No backend response is forged; only network ordering is managed.
+
+## Observed (synthetic data)
+
+Delayed pre-join body:
+  {"queue":[{"position":1,"group":"4431","fio":"Петрова Полина Сергеевна",
+             "lab":"ЛР1","session_no":2,"status":"ждёт"}],
+   "size":1,"is_team_lab":false,"queue_open":true}
+
+After join (`afterJoin`): notice "Вы записаны в очередь", status
+"Вы в очереди: позиция 2 из 2", list contains Петрова (1) and
+Иванов Иван Иванович (2), button "Выйти из очереди".
+
+After the old GET is released (`afterOldRead`): the notice "Вы записаны в
+очередь" is still shown, but the status line and withdraw controls disappear,
+the "Записаться" button is shown again, and the list contains only
+Петрова (1); Иванов is absent.
+
+Stored synthetic queue at that moment (`storedQueue`) still contains:
+  Петрова Полина Сергеевна / ЛР1 / ждёт / position 1
+  Иванов Иван Иванович / ЛР1 / ждёт / position 2
+So the server is current; the page is stale.
+
+After clicking "Обновить" once (`afterRefresh`): status "2 из 2", withdraw
+controls and both rows are back (self-healing on manual refresh).
+
+## Own artifact
+
+`evidence/C05/verification-stale.png` — own full-page screenshot captured at
+the stale state in a separate reproduction of the same steps (reset +
+clearCookies + held pre-join GET), before any manual refresh. The author's
+screenshot was not reused.
+
+The script completed successfully and its own guard rejected a non-stale run
+("Stale display not observed..."). No headers, cookies, tokens or raw HAR were
+saved.
+
+## Source path
+
+- `source/frontend/courses-front/src/components/registration-form/QueueSection.jsx:80-96`
+  — `reload()` does `Promise.all([status, queue])` then unconditionally sets
+  both states.
+- `QueueSection.jsx:98-123` — initial effect has the same unguarded
+  Promise.all/setState pattern.
+- `QueueSection.jsx:125-140` — `handleJoinQueue` posts the join, sets the
+  success notice, then awaits `reload()`; there is no request-generation /
+  abort guard.
+- `source/frontend/courses-front/src/api/index.js:51-86` — queue requests are
+  plain `fetch` without AbortController or sequencing.
+- Consequence: an older in-flight list response can land after a newer one and
+  overwrite `queue`/`status`, while the success notice remains.
+
+## Base comparison
+
+`QueueSection.jsx` and `grading/queue/cache.py` are absent in base
+(cat-file exit 128); diff base..pinned adds QueueSection.jsx +368,
+api/index.js +67/-1, cache.py +110. The UI race is introduced by this PR.
+
+## Objection
+
+"Network delay is artificial; the response reorder is manufactured, and this
+does not prove the colleague's original latency/TTL cause."
+
+Response: the ordering is artificial, but the response is the real server body
+and the two requests are genuine application requests; the app has no
+generation/abort guard, so a slow older GET overwriting a newer one is a
+legitimate response-reorder race. I do not claim the colleague's original cause,
+a backend cache/TTL delay, or production latency. The visible contradiction
+itself is real: success notice + missing own row + register button again, while
+the stored row exists; manual refresh recovers. The narrow trigger (refresh
+while joining) is a limitation, not a forgery.
+
+## Limits
+
+Synthetic Sheets/GitHub/CI/window; real pinned frontend/backend routes. Browser
+timing is controlled by the script. No real network latency, HAR or secrets.

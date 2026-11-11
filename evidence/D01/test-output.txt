@@ -1,0 +1,12 @@
+repro/D01/test_d01_snapshot.py::test_observed_snapshot_archives_rows_and_maps_waiting_to_not_reached PASSED [ 16%]
+repro/D01/test_d01_snapshot.py::test_control_retry_after_partial_append_has_no_loss_and_no_duplicates PASSED [ 33%]
+repro/D01/test_d01_snapshot.py::test_control_retry_after_full_append_failure_copies_once PASSED [ 50%]
+repro/D01/test_d01_snapshot.py::test_control_second_run_is_idempotent_and_future_tabs_are_kept PASSED [ 66%]
+repro/D01/test_d01_snapshot.py::test_regression_close_must_not_drop_row_added_after_read FAILED [ 83%]
+repro/D01/test_d01_snapshot.py::test_regression_late_status_change_must_not_be_archived_stale FAILED [100%]
+E   AssertionError: desired contract (SETUP.md:104-105,129-130): a row written to the past-day tab after the backend read it must either be archived or keep the tab for the next run; actual: history FIOs ['Иванов Иван', 'Петрова Анна', 'Сидоров Пётр'], tab still present=False
+    assert still_open or archived.get("Иванов Иван") == STATUS_PASSED, (
+E   AssertionError: desired contract (SETUP.md:104-105,129-130): the close must observe the tab as it was at deletion time; actual: archived status for Иванов Иван is 'не_дошло', all statuses {'Иванов Иван': 'не_дошло', 'Петрова Анна': 'сдал', 'Сидоров Пётр': 'отозван'}, tab still present=False
+FAILED repro/D01/test_d01_snapshot.py::test_regression_close_must_not_drop_row_added_after_read
+FAILED repro/D01/test_d01_snapshot.py::test_regression_late_status_change_must_not_be_archived_stale
+========================= 2 failed, 4 passed in 1.33s ==========================

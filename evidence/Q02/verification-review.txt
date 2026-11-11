@@ -1,0 +1,49 @@
+Q02 independent review — source contract, comparison, objection
+Actor: deepseek-order2-V. SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d.
+The packet discovery is still pending; the scope comes from
+scratch/pipeline/C06/split-proposal.json, Q02 object, and the unchanged test.
+
+Requirement / real path
+- main.queue_set_status reads group_ids = _schedule_group_ids(...) and calls
+  store.set_status(..., body.status, group_ids) positionally
+  (source/main.py:3526-3531).
+- store.set_status signature is (..., status, session_no=None, group_ids=())
+  (source/grading/queue/store.py:507-516), so the list of group ids lands in
+  session_no; group_ids stays empty.
+- set_status calls _renumber_waiting(worksheet, group, lab, session_no)
+  (store.py:543); _renumber_waiting filters list_waiting by
+  row.session_no == session_no (store.py:384-397). A list of group ids never
+  equals an integer session number, so no row is updated.
+- queue_status computes queue_size via list_waiting without session
+  (main.py:3101) and position from the stored row (main.py:3169,3213-3214).
+
+Observed contract violation
+- After admin marks "сдал" for the first of two waiting students, the remaining
+  waiting row stays at position 2 while queue_size is 1: "position 2 of 1".
+  The test drives the real HTTP endpoints; only Sheets/CI/session seams are
+  synthetic.
+
+Base comparison (independent)
+- git cat-file base:grading/queue/store.py -> exit 128 (whole queue package
+  absent in eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39).
+- base main.py has zero queue route matches; diff base..pinned adds store.py
+  +678 and main.py +1248/-13. set-status and store.set_status are introduced
+  by this PR.
+
+Strongest reasonable objection
+"The queue may intentionally keep absolute positions after someone passes; the
+next person being '2' could be historical numbering, not a bug."
+
+Answer
+- store.set_status explicitly calls _renumber_waiting, so renumbering is the
+  code's stated intent; the positional argument makes it a silent no-op.
+- The displayed status is "position 2 of 1" and the UI renders position as the
+  queue number, so the invariant position <= queue_size is violated at the
+  public surface.
+- Absolute historical numbering would still require not mixing it with a
+  live queue_size and a waiting-only list; this packet concerns the
+  set-status renumbering path only, not list scope (C06) or session scope
+  (Q01).
+
+Limits: synthetic Sheets + TestClient; no real Sheets/browser/network. One
+group, one lab, two waiting students.

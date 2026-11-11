@@ -1,0 +1,47 @@
+C03 independent verification run — actor deepseek-gates-V
+SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Receipt: scratch/pipeline/C03/runs/0e3b15ca7c2647a69d810583dcc72cb5.json
+Log: scratch/pipeline/C03/runs/0e3b15ca7c2647a69d810583dcc72cb5.log (sha256 cbab0947dae8f3f01183b3b25c8fcae4f73176b3cc1236348321ca0d7457f374)
+
+Command (new pytest process through the review runner):
+.venv/bin/python scripts/review_pipeline.py run C03 \
+  --actor deepseek-gates-V --timeout 120 \
+  --artifact repro/C03/test_ci_admission.py \
+  --artifact scripts/run_review_tests.py -- \
+  .venv/bin/python scripts/run_review_tests.py repro/C03/ -v --tb=short
+
+Environment: Python 3.12.13, pytest 9.2.0; disposable hash-pinned runtime
+scratch/runtime/app; external sockets blocked by run_review_tests.py.
+Baseline before/after: OK, source 20bea22..., submodule 6ee9973...
+Target exit: 1 (expected for a failing regression); timed_out=false;
+baseline_clean_after=true.
+
+Unchanged-input proof:
+  repro/C03/test_ci_admission.py  sha256 983e8b7fdb4cc1a08ac39a4e01268dd415098c209d71816b9bab5264bacc5fbf
+  scripts/run_review_tests.py    sha256 c33017ead03db9eff2ca30e08463d7522b86da21744087217d9650aa90148105
+The test hash equals the author's receipt input (deepseek-gates-B,
+scratch/pipeline/C03/runs/03e5d25bd5af4660a0aa03b9e681e834.json); the test
+and runner were not edited.
+
+Result: 2 failed, 2 passed, 1 warning in 8.27s.
+  PASSED test_control_passing_ci_admits_and_records_grade
+  PASSED test_control_pending_ci_is_rejected
+  FAILED test_failing_ci_must_not_admit
+  FAILED test_protected_passing_cell_with_failing_current_ci_must_not_admit
+
+Failure 1:
+  assert response.status_code == 400 and states == []
+  actual: register HTTP 200 ({"position":1,"queue_size":1}),
+  waiting rows [("Студент Гамма", "ждёт")], grade cell after the call "x".
+Failure 2 (protected cell):
+  actual: register HTTP 200 ({"position":1,"queue_size":1}),
+  waiting rows [("Студент Гамма", "ждёт")], grade cell "v".
+
+Runner log confirms the failing job was seen and selected:
+  Relevant job: test (conclusion: failure)
+  Successful runs for TASKID extraction: 0
+  POST .../queue/register "HTTP/1.1 200 OK"
+
+Verdict: failure is not a setup/import/collection error. The desired contract
+fails in the real main.queue_register -> ensure_ci_passed -> evaluate_student
+path, while both controls pass.

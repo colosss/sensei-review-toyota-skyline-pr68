@@ -1,0 +1,41 @@
+Q03 independent verification run — actor deepseek-final-V
+SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Receipt: scratch/pipeline/Q03/runs/0a7ab4e8b8a94cf2a2b621c80e521cbe.json
+Log: scratch/pipeline/Q03/runs/0a7ab4e8b8a94cf2a2b621c80e521cbe.log
+
+Command (approved wrapper command; only the assigned test):
+.venv/bin/python scripts/review_pipeline.py run Q03 \
+  --actor deepseek-final-V --timeout 120 \
+  --artifact repro/Q03/conftest.py \
+  --artifact repro/C06/c06_fake_sheets.py \
+  --artifact repro/Q03/test_q03_same_fio_distinct_login.py \
+  --artifact scripts/run_review_tests.py -- \
+  .venv/bin/python scripts/run_review_tests.py \
+  repro/Q03/test_q03_same_fio_distinct_login.py -v --tb=short
+
+Environment: Python 3.12.13, pytest 9.2.0; disposable hash-pinned
+scratch/runtime/app; external sockets blocked. Baseline clean before/after.
+Exit 1, timeout=false.
+
+Inputs (unchanged vs deepseek-queue-B receipt):
+  repro/Q03/conftest.py                     5d913498d72753eeebe1cbea689d8f33d5a4cc9780d09f585b8527e0c7c4d8f2
+  repro/C06/c06_fake_sheets.py              036c6fabb786585ab7f7c2cab5ebd6f3a4f27b0953f867b180381b72b8d3054f
+  repro/Q03/test_q03_same_fio_distinct_login.py b3254390b5352b9f923d5b08cd50b4c882780c46efc2aec905bec18182030c9f
+  scripts/run_review_tests.py               c33017ead03db9eff2ca30e08463d7522b86da21744087217d9650aa90148105
+
+Result: 2 failed, 3 passed, 1 warning in 0.24s.
+  PASSED test_observed_b_withdraw_changes_a_row
+  PASSED test_observed_b_shift_reorders_a_row
+  PASSED test_control_distinct_fio_withdraw_changes_only_own_row
+  FAILED test_regression_b_withdraw_must_not_change_a_row
+  FAILED test_regression_b_shift_must_not_reorder_a_row
+
+Failures:
+- B withdraw: HTTP 200 {"status":"withdrawn"};
+  rows [(1,'Иванов Иван','отозван')] — A's row changed.
+- B shift 1: HTTP 200 {"old_position":1,"new_position":2};
+  rows [(2,'Иванов Иван','ждёт'),(1,'Петрова Анна','ждёт')] — A moved.
+
+Identity setup: roster has two real rows with FIO "Иванов Иван" and distinct
+GitHub logins c06-ivanov-a/c06-ivanov-b. B's cookie is built with the app signer
+and B's own username; no public registration and no A login are used.

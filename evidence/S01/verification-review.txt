@@ -1,0 +1,57 @@
+S01 independent review — docs expectation, code path, strongest objection
+Actor: deepseek-gates-V. SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d.
+
+Requirement / docs expectation
+- source/docs/schedule-config.md:271-273 says remove_slots may additionally
+  carry labs, and then "отменяются только эти лабораторные в слоте";
+  without labs the whole slot is cancelled.
+- source/docs/schedule-config.md:289-293 gives the canonical example:
+  remove_slots with labs ["3"] cancels only lab 3 of a slot.
+- source/frontend/.../CorrectionsDialog/index.jsx:224-229 creates exactly
+  remove_slots = [{slot_id, labs: [...]}] for the "cancel" correction type.
+- The shipped source/schedules/dev-course.yaml slots have no labs key and
+  there is no queue_settings/all_lab_ids in docs or shipped schedules.
+
+Real code path
+- source/grading/schedule/manual.py:294-299 only exposes all_lab_ids from
+  queue_settings; :318-324 passes it into _resolve_day.
+- source/grading/schedule/manual.py:360-368 materializes labs only when the
+  slot has labs=None AND all_lab_ids is not None. Otherwise allowed_lab_ids
+  stays None, which base.py documents as "all labs".
+- source/grading/schedule/manual.py:379-394 subtracts labs only when
+  current is not None; the `continue` at :391-393 silently skips the
+  cancellation for the no-labs slot.
+- source/grading/queue/schedule_window.py:161-166 accepts the slot when
+  allowed_lab_ids is None, so the cancelled lab reaches queue_register and
+  gets a waiting row.
+- The test drives the real main.queue_register, with only schedule dir and
+  Sheets/CI seams replaced; the managed clock is passed into the real
+  active_session_for, not the system clock.
+
+Strongest reasonable objection
+"The documentation example uses `id`, while the implementation/validator
+requires `slot_id` (manual.py:143-146). The test uses `slot_id`, which is the
+admin-UI key, not the documented YAML key. A teacher following the docs would
+get a validation error rather than a silent ignore, so the tested path may not
+be the documented one."
+
+Answer
+- The same docs section says the admin creates this correction type
+  (schedule-config.md:279), and the admin dialog sends slot_id
+  (CorrectionsDialog:229). The tested key is therefore the actual supported
+  UI path, not an invented one.
+- The docs promise the labs-cancellation semantics without any mention of
+  queue_settings.all_lab_ids; that key is absent from docs and from
+  source/schedules/dev-course.yaml, and the shipped slots have no labs key.
+  On that supported shape the correction is silently ignored.
+- The id-vs-slot_id mismatch is a separate documentation/validation defect
+  (the author's limitations note it as a separate candidate); it does not
+  rescue the tested UI/documented-config behaviour. It does mean this packet
+  should not be expanded into that second root cause.
+- Controls: no correction allows ЛР3; explicit labs ['1','3'] closes ЛР3 with
+  403 QUEUE_CLOSED; after auto_close the queue is closed. Thus the failure is
+  specifically the no-labs/all_lab_ids branch, not the test setup.
+
+Verdict: confirmed for the shipped/no-labs slot shape and the admin-UI
+correction form. Limitation: manual-YAML only; GUAP import, week parity and
+multi-session days were not exercised.

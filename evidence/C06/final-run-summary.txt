@@ -1,0 +1,88 @@
+C06 final recorder run (pinned SHA 20bea22cf4a1cbc19634a984883ff52764ce9d6d)
+Receipt: scratch/pipeline/C06/runs/96bbbc9bcab342b39396bb7b7341a52a.json
+Command: .venv/bin/python scripts/run_review_tests.py repro/C06/ -v --tb=short
+Exit code: 1 (4 desired-contract regressions fail; 6 observation tests pass)
+
+--- collected and per-test result ---
+../../../repro/C06/test_c06_same_fio_identity.py::test_observed_same_fio_different_github_shares_one_queue_slot PASSED [ 10%]
+../../../repro/C06/test_c06_screenshot_chain.py::test_observed_screenshot_chain_reproduces_2_1_1_and_2_of_2 PASSED [ 20%]
+../../../repro/C06/test_c06_screenshot_chain.py::test_observed_list_mixes_other_groups_too PASSED [ 30%]
+../../../repro/C06/test_c06_screenshot_chain.py::test_regression_lab_page_list_is_scoped_to_requested_group_and_lab FAILED [ 40%]
+../../../repro/C06/test_c06_session_scope.py::test_observed_two_pairs_in_one_day_give_duplicate_positions PASSED [ 50%]
+../../../repro/C06/test_c06_session_scope.py::test_regression_position_is_unique_for_one_group_lab_day FAILED [ 60%]
+../../../repro/C06/test_c06_set_status_renumber.py::test_observed_set_status_leaves_the_waiting_queue_at_position_2 PASSED [ 70%]
+../../../repro/C06/test_c06_set_status_renumber.py::test_regression_set_status_renumbers_the_remaining_waiting_queue FAILED [ 80%]
+../../../repro/C06/test_c06_withdraw_rejoin.py::test_observed_withdraw_and_rejoin_show_the_same_person_twice PASSED [ 90%]
+../../../repro/C06/test_c06_withdraw_rejoin.py::test_regression_displayed_positions_are_unique_after_withdraw_and_rejoin FAILED [100%]
+../../../repro/C06/test_c06_screenshot_chain.py:136: in test_regression_lab_page_list_is_scoped_to_requested_group_and_lab
+../../../repro/C06/test_c06_session_scope.py:76: in test_regression_position_is_unique_for_one_group_lab_day
+../../../repro/C06/test_c06_set_status_renumber.py:73: in test_regression_set_status_renumbers_the_remaining_waiting_queue
+../../../repro/C06/test_c06_withdraw_rejoin.py:82: in test_regression_displayed_positions_are_unique_after_withdraw_and_rejoin
+FAILED ../../../repro/C06/test_c06_screenshot_chain.py::test_regression_lab_page_list_is_scoped_to_requested_group_and_lab
+FAILED ../../../repro/C06/test_c06_session_scope.py::test_regression_position_is_unique_for_one_group_lab_day
+FAILED ../../../repro/C06/test_c06_set_status_renumber.py::test_regression_set_status_renumbers_the_remaining_waiting_queue
+FAILED ../../../repro/C06/test_c06_withdraw_rejoin.py::test_regression_displayed_positions_are_unique_after_withdraw_and_rejoin
+
+--- assertion detail ---
+=================================== FAILURES ===================================
+______ test_regression_lab_page_list_is_scoped_to_requested_group_and_lab ______
+../../../repro/C06/test_c06_screenshot_chain.py:136: in test_regression_lab_page_list_is_scoped_to_requested_group_and_lab
+    assert labs == [fx.LAB1_SHORT] * len(entries), (
+E   AssertionError: desired: the lab1 page must list only lab1 rows; actual labs: ['ЛР1', 'ЛР2', 'ЛР1'], positions [2, 1, 1], status says 2 of 2
+E   assert ['ЛР1', 'ЛР2', 'ЛР1'] == ['ЛР1', 'ЛР1', 'ЛР1']
+E     
+E     At index 1 diff: 'ЛР2' != 'ЛР1'
+E     
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       [
+E           'ЛР1',
+E     -     'ЛР1',...
+E     
+E     ...Full output truncated, use '-vv' to show
+----------------------------- Captured stderr call -----------------------------
+------------------------------ Captured log call -------------------------------
+___________ test_regression_position_is_unique_for_one_group_lab_day ___________
+../../../repro/C06/test_c06_session_scope.py:76: in test_regression_position_is_unique_for_one_group_lab_day
+    assert len(set(positions)) == len(positions), (
+E   AssertionError: desired: positions shown for one group/lab/day are unique; actual positions [1, 1] for rows of sessions [1, 2], while status reports position 1 of 2
+E   assert 1 == 2
+E    +  where 1 = len({1})
+E    +    where {1} = set([1, 1])
+E    +  and   2 = len([1, 1])
+----------------------------- Captured stderr call -----------------------------
+------------------------------ Captured log call -------------------------------
+_______ test_regression_set_status_renumbers_the_remaining_waiting_queue _______
+../../../repro/C06/test_c06_set_status_renumber.py:73: in test_regression_set_status_renumbers_the_remaining_waiting_queue
+    assert waiting_positions == list(range(1, len(waiting_positions) + 1)), (
+E   AssertionError: desired: the waiting queue is renumbered to 1..n after set-status; actual waiting positions [2], status reports position 2 of 1
+E   assert [2] == [1]
+E     
+E     At index 0 diff: 2 != 1
+E     
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       [
+E     -     1,
+E     ?     ^...
+E     
+E     ...Full output truncated, use '-vv' to show
+----------------------------- Captured stderr call -----------------------------
+------------------------------ Captured log call -------------------------------
+___ test_regression_displayed_positions_are_unique_after_withdraw_and_rejoin ___
+../../../repro/C06/test_c06_withdraw_rejoin.py:82: in test_regression_displayed_positions_are_unique_after_withdraw_and_rejoin
+    assert len(set(positions)) == len(positions), (
+E   AssertionError: desired: no two rows of the lab1 list share a position; actual positions [1, 1, 2] with statuses ['отозван', 'ждёт', 'ждёт']
+E   assert 2 == 3
+E    +  where 2 = len({1, 2})
+E    +    where {1, 2} = set([1, 1, 2])
+E    +  and   3 = len([1, 1, 2])
+----------------------------- Captured stderr call -----------------------------
+------------------------------ Captured log call -------------------------------
+=============================== warnings summary ===============================
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+=========================== short test summary info ============================
+FAILED ../../../repro/C06/test_c06_screenshot_chain.py::test_regression_lab_page_list_is_scoped_to_requested_group_and_lab
+FAILED ../../../repro/C06/test_c06_session_scope.py::test_regression_position_is_unique_for_one_group_lab_day
+FAILED ../../../repro/C06/test_c06_set_status_renumber.py::test_regression_set_status_renumbers_the_remaining_waiting_queue
+FAILED ../../../repro/C06/test_c06_withdraw_rejoin.py::test_regression_displayed_positions_are_unique_after_withdraw_and_rejoin
+==================== 4 failed, 6 passed, 1 warning in 0.52s ====================

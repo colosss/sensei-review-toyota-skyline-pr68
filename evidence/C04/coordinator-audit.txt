@@ -1,0 +1,26 @@
+Coordinator Sol audit — C04, SHA 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+
+Read author test and independently reran unchanged via run_review_tests.py in new process/fresh fake storage.
+Receipt scratch/pipeline/C04/runs/5ac6164330c64f7db265bd0533a7349c.json
+Exit 1; no timeout; baseline clean after.
+2 failed, 1 passed, 1 StarletteDeprecationWarning, 2.31s.
+Failure at test line 318: withdraw HTTP 200, entry status 'отозван'.
+Failure at test line 341: shift HTTP 200, position 1 -> 2.
+Control passed: anonymous without session 401; separate identity A 404, B unchanged.
+No import/collection/setup failure. Fakes do not patch session authorisation, identity lookup or queue mutation. CI/window are patched only to supply valid registration setup. Rate limiter disabled. No token/cookie values stored.
+
+Source inspected directly:
+main.py:1000-1006 GET /users/{login} checks existence only.
+main.py:1013-1023 builds signed session from form; 1040-1055 reissues for already_registered.
+main.py:2940-2945 validates cookie signature and course/group, not ownership at issuance.
+main.py:3328 docstring 'Withdraw the authenticated student'; 3332 uses student_session; 3344-3347 maps login -> roster FIO; 3357 calls store withdraw.
+main.py:3376 docstring 'Shift the authenticated student'; 3380 uses session, 3392-3395 maps FIO; 3404 calls store shift.
+
+Static base diff inspected: main.py adds cookie issuance and all queue routes; inherited registration did not create these queue permissions. Base not executed.
+
+ADR:23-28 DOES NOT literally say 'only their own' for writes. Author README overstates that wording; final REVIEW does not rely on that quotation. CANDIDATES is review criterion, not primary app requirement. Expected behaviour instead grounded in actual authenticated-student endpoint contract / identity-based own-record selection and integrity impact. Existing OAuth queue flow is context, not proof that OAuth is the only acceptable authentication method.
+
+Shift direction correction: B 1 -> 2 places B BEHIND C, not ahead of C (some author's summaries phrase this imprecisely).
+
+One root cause: unverified session issuance, shared by withdraw/shift. No overlap with refuted C02 same-FIO duplicate checks; no other confirmed findings in this wave.
+Sanitized review test/evidence contain synthetic data only; raw logs kept under scratch. No publication, app fixes or new long-running processes.

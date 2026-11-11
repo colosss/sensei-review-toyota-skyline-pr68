@@ -1,0 +1,76 @@
+C04 independent static verification (actor deepseek-c04-V)
+SHA 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Base eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39
+Static comparison only: base behaviour was NOT executed (base has no queue feature).
+
+1. Expected-behaviour wording is narrower than "only own" for writes
+   source/docs/hackathon/ADR-queue-storage.md:23-28:
+     23: - **Кто читает:** студенты — свой статус и позицию ...
+     26: - **Кто пишет:** студенты — записываются, выходят, сдвигаются
+     27:   (несколько раз за занятие); преподаватель — отмечает результат защиты
+   The ADR says "свой статус и позицию" for reading; for writes it lists the
+   self-service actions without the literal word "свои". The finding therefore
+   rests on the identity contract and the criterion in CANDIDATES.md:30
+   (unauthorised action on another's record under the identity contract), not on
+   a literal ADR prohibition of acting for another student.
+
+2. Current call path (authority)
+   source/main.py:2940-2945  _require_student_session: reads only the signed
+     student_session cookie; checks course/group; returns github/fio.
+   source/main.py:3251 (queue_register), 3332 (queue_withdraw), 3380
+     (queue_shift): all resolve the acting student from that cookie.
+   source/main.py:3350-3352 / 3398-3400 (individual lab): fio is resolved by
+     the cookie's GitHub login via load_sheet_context (github -> roster row).
+   source/grading/queue/sheets_context.py:56-64: GitHub login from the session
+     selects the roster row; the queue row is then keyed by that FIO.
+
+3. Where the cookie comes from (unverified issuance)
+   source/main.py:1008-1019: the only identity proof is GET
+     https://api.github.com/users/{login} status 200 (login exists), then
+     build_student_session(github, fio, course, group).
+   source/main.py:1040-1055: when the roster row already contains the same
+     login, the endpoint answers "already_registered" and still sets the cookie.
+   source/main.py:1015-1016 (author comment): "Build signed student_session
+     cookie from the registration form data. The queue reads this cookie
+     instead of requiring a separate GitHub OAuth."
+
+4. The PR also adds an OAuth queue identity that is never enforced
+   source/grading/queue/session.py:55-72 require_queue_session is scoped to
+     course/group/lab. Grep of source (non-test):
+       only main.py:135 import and session.py/__init__.py definitions; it is
+       never called by any route.
+   source/main.py:3604-3612: OAuth callback issues QUEUE_SESSION_COOKIE.
+   Frontend: getQueueLoginUrl is defined at api/index.js:48-49 but never used
+     (only the definition matches); QueueSection.jsx instead calls
+     registerAndCheck (public /register) when status.session_required, then
+     queue/register. So the shipped UI uses the unverified public form as the
+     queue login.
+
+5. Base comparison (static)
+   $ git -C source ls-tree -r --name-only eef98bb | grep -E 'grading/queue'
+     -> no output (queue package absent at base)
+   $ git -C source show eef98bb:main.py | grep -n \
+       'student_session|build_student_session|parse_student_session|def queue_|queue/register|QUEUE_SESSION'
+     -> NO_MATCHES
+   Base /register (eef98bb:main.py:938-945) returns plain dicts, no set_cookie;
+   the existing_github == student.github branch is present but grants nothing.
+   PR adds build_student_session + cookie issuance (main.py:1013-1055) and all
+   queue routes/authorisation (main.py:2940-2945, 3251, 3332, 3380).
+   Therefore the queue authority is introduced by the PR even though the public
+   registration form itself is inherited.
+
+6. Data exposure relevant to impact
+   source/main.py:3433-3444: queue/list is public and returns fio/position/
+   status for every waiting row. The attacker still needs the target's public
+   GitHub login; how a peer learns it in this UI was not tested.
+
+7. Fake-client contract used by the author test
+   GitHub fake replaces only requests.get with status 200 for
+   /users/{login}; register_student only reads status_code (main.py:1008-1013),
+   so the fake is contract-compliant for the exercised path.
+   Fake Sheets implements col_values, row_values, cell().value, update_cell,
+   get_all_values, append_row, batch_update, worksheet(s), add_worksheet,
+   fetch_sheet_metadata; these are the calls reached by the real endpoints.
+   The real authorisation functions (_require_student_session, withdraw/shift,
+   load_sheet_context) are not mocked; CI check and rate limit are the only
+   patched app behaviours and are outside this invariant.

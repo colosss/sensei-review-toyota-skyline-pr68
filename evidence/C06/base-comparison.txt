@@ -1,0 +1,21 @@
+C06 static base comparison (no base behavior was executed).
+Pinned: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Base:   eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39 (hackathon/queue)
+
+Command 1: git -C source cat-file -e <base>:grading/queue/store.py
+fatal: path 'grading/queue/store.py' exists on disk, but not in 'eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39'
+exit=128
+Result: the whole grading/queue package is absent in the base commit.
+
+Command 2: git -C source show <base>:main.py | grep -c "queue/register|queue/status|queue/shift|queue_list"
+Result: 0 matching lines in the base main.py.
+
+Command 3: git -C source diff --stat <base>..<pinned> -- grading/queue/store.py main.py frontend/courses-front/src/components/registration-form/QueueSection.jsx frontend/courses-front/src/api/index.js
+ frontend/courses-front/src/api/index.js            |   68 +-
+ .../components/registration-form/QueueSection.jsx  |  368 ++++++
+ grading/queue/store.py                             |  678 +++++++++++
+ main.py                                            | 1261 +++++++++++++++++++-
+ 4 files changed, 2361 insertions(+), 14 deletions(-)
+
+Conclusion: every line cited by the C06 observations/regressions is added by
+this PR (introduced), not inherited from the base commit.

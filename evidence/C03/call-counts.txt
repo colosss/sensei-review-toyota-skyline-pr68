@@ -1,0 +1,15 @@
+first attempt: HTTP 200 {"position":1,"queue_size":1}
+
+[first admission] github GET count = 8
+  1x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/contents/.github/workflows
+  3x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/commits
+  3x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/commits/c030000000000000000000000000000000000000
+  1x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/commits/c030000000000000000000000000000000000000/check-runs
+duplicate attempt: HTTP 409 {"detail":"ALREADY_IN_QUEUE"}
+
+[duplicate attempt] github GET count = 8
+  1x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/contents/.github/workflows
+  3x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/commits
+  3x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/commits/c030000000000000000000000000000000000000
+  1x https://api.github.com/repos/review-c03-org/c03lab-c03-student-a/commits/c030000000000000000000000000000000000000/check-runs
+PASSED

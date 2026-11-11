@@ -1,0 +1,39 @@
+D01 independent verification run — actor deepseek-final-V
+SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Receipt: scratch/pipeline/D01/runs/6cbf6b156f9347c9bbb64e3a98148dd7.json
+Log: scratch/pipeline/D01/runs/6cbf6b156f9347c9bbb64e3a98148dd7.log
+
+Command (approved wrapper command; only the assigned test):
+.venv/bin/python scripts/review_pipeline.py run D01 \
+  --actor deepseek-final-V --timeout 120 \
+  --artifact repro/D01/test_d01_snapshot.py \
+  --artifact scripts/run_review_tests.py -- \
+  .venv/bin/python scripts/run_review_tests.py \
+  repro/D01/test_d01_snapshot.py -v --tb=short
+
+Environment: Python 3.12.13, pytest 9.2.0; disposable hash-pinned
+scratch/runtime/app; external sockets blocked. Baseline clean before/after.
+Exit 1, timeout=false.
+
+Inputs (test unchanged vs deepseek-durable-B receipt):
+  repro/D01/test_d01_snapshot.py  aecb25f2afa94042d7cf39471bf84c4aac843000ad834735f1659d220319801b
+  scripts/run_review_tests.py     c33017ead03db9eff2ca30e08463d7522b86da21744087217d9650aa90148105
+
+Result: 2 failed, 4 passed, 1.36s.
+  PASSED test_observed_snapshot_archives_rows_and_maps_waiting_to_not_reached
+  PASSED test_control_retry_after_partial_append_has_no_loss_and_no_duplicates
+  PASSED test_control_retry_after_full_append_failure_copies_once
+  PASSED test_control_second_run_is_idempotent_and_future_tabs_are_kept
+  FAILED test_regression_close_must_not_drop_row_added_after_read
+  FAILED test_regression_late_status_change_must_not_be_archived_stale
+
+Failures:
+1) late "Новиков Олег" row added after the read:
+   history FIOs ['Иванов Иван', 'Петрова Анна', 'Сидоров Пётр'],
+   tab still present=False.
+2) late Иванов status change to "сдал":
+   archived status 'не_дошло', tab still present=False.
+
+The external write is injected deterministically in the fake workbook's
+batch_update callback, i.e. after snapshot_sheet has read and built the append
+list and before appendCells/deleteSheet are applied. No sleep, no network.

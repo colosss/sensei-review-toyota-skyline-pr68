@@ -1,0 +1,494 @@
+{
+  "backend_health": [
+    200,
+    {
+      "ok": true,
+      "mode": "synthetic",
+      "course": "review-c01"
+    }
+  ],
+  "courses": [
+    200,
+    [
+      {
+        "id": "review-c01",
+        "name": "Synthetic Review Course",
+        "university": "Review Lab",
+        "semester": "Autumn 2026",
+        "logo": "",
+        "email": "",
+        "status": "active",
+        "priority": 1000,
+        "featured": false
+      }
+    ]
+  ],
+  "groups": [
+    200,
+    [
+      "4431",
+      "4432"
+    ]
+  ],
+  "labs": [
+    200,
+    [
+      "ЛР1"
+    ]
+  ],
+  "registration": [
+    200,
+    {
+      "status": "registered",
+      "message": "Аккаунт GitHub успешно задан"
+    }
+  ],
+  "registration_cookie": [
+    "student_session"
+  ],
+  "grade": [
+    200,
+    {
+      "status": "updated",
+      "result": "v",
+      "message": "Synthetic CI: все проверки пройдены",
+      "passed": "3/3 проверок пройдено",
+      "checks": [
+        "synthetic-ci: success"
+      ]
+    }
+  ],
+  "queue_status": [
+    200,
+    {
+      "in_queue": false,
+      "position": null,
+      "queue_size": 1,
+      "ci_status": "passed",
+      "can_register": true,
+      "already_passed": false,
+      "is_team_lab": false,
+      "team": null,
+      "queue_open": true,
+      "session": {
+        "slot_id": "review-slot-2",
+        "starts_at": "2026-11-11T10:40:00",
+        "ends_at": "2026-11-11T12:10:00",
+        "room": "A-101",
+        "subject": "Synthetic defense"
+      },
+      "next_session": null
+    }
+  ],
+  "queue_register": [
+    200,
+    {
+      "position": 2,
+      "queue_size": 2
+    }
+  ],
+  "queue_list": [
+    200,
+    {
+      "queue": [
+        {
+          "position": 1,
+          "group": "4431",
+          "fio": "Петрова Полина Сергеевна",
+          "lab": "ЛР1",
+          "session_no": 2,
+          "status": "ждёт"
+        },
+        {
+          "position": 2,
+          "group": "4431",
+          "fio": "Иванов Иван Иванович",
+          "lab": "ЛР1",
+          "session_no": 2,
+          "status": "ждёт"
+        }
+      ],
+      "size": 2,
+      "is_team_lab": false,
+      "queue_open": true
+    }
+  ],
+  "admin_login": [
+    200,
+    {
+      "authenticated": true
+    }
+  ],
+  "admin_check_auth": [
+    200,
+    {
+      "authenticated": true
+    }
+  ],
+  "admin_queue_today": [
+    200,
+    {
+      "queue": [
+        {
+          "position": 1,
+          "group": "4431",
+          "fio": "Петрова Полина Сергеевна",
+          "lab": "ЛР1",
+          "session_no": 2,
+          "status": "ждёт"
+        },
+        {
+          "position": 2,
+          "group": "4431",
+          "fio": "Иванов Иван Иванович",
+          "lab": "ЛР1",
+          "session_no": 2,
+          "status": "ждёт"
+        }
+      ],
+      "size": 2,
+      "date": "2026-11-11"
+    }
+  ],
+  "admin_set_status": [
+    200,
+    {
+      "status": "updated",
+      "new_status": "сдал"
+    }
+  ],
+  "queue_after_admin_set_status": [
+    200,
+    {
+      "queue": [
+        {
+          "position": 1,
+          "group": "4431",
+          "fio": "Петрова Полина Сергеевна",
+          "lab": "ЛР1",
+          "session_no": 2,
+          "status": "сдал"
+        },
+        {
+          "position": 2,
+          "group": "4431",
+          "fio": "Иванов Иван Иванович",
+          "lab": "ЛР1",
+          "session_no": 2,
+          "status": "ждёт"
+        }
+      ],
+      "size": 2,
+      "is_team_lab": false,
+      "queue_open": true
+    }
+  ],
+  "state_after_register": [
+    200,
+    {
+      "course": {
+        "id": "review-c01",
+        "name": "Synthetic Review Course",
+        "groups": [
+          "4431",
+          "4432"
+        ],
+        "labs": {
+          "1": {
+            "short-name": "ЛР1",
+            "github-prefix": "lab1"
+          }
+        },
+        "spreadsheet": "review-c01-sheet"
+      },
+      "today": "2026-11-11",
+      "session": {
+        "slot_id": "review-slot-2",
+        "starts_at": "2026-11-11T10:40:00",
+        "ends_at": "2026-11-11T12:10:00",
+        "room": "A-101"
+      },
+      "roster": {
+        "4431": [
+          {
+            "row": 3,
+            "fio": "Иванов Иван Иванович",
+            "github": "review-ivanov"
+          },
+          {
+            "row": 4,
+            "fio": "Петрова Полина Сергеевна",
+            "github": "review-petrova"
+          },
+          {
+            "row": 5,
+            "fio": "Сидоров Олег Петрович",
+            "github": ""
+          }
+        ],
+        "4432": [
+          {
+            "row": 3,
+            "fio": "Альфа Алина Андреевна",
+            "github": ""
+          },
+          {
+            "row": 4,
+            "fio": "Бета Борис Борисович",
+            "github": "review-beta"
+          }
+        ]
+      },
+      "queue": [
+        {
+          "ПОЗИЦИЯ": "1",
+          "ГРУППА": "4431",
+          "ФИО": "Петрова Полина Сергеевна",
+          "ЛР": "ЛР1",
+          "Пар№": "2",
+          "Статус": "сдал"
+        },
+        {
+          "ПОЗИЦИЯ": "2",
+          "ГРУППА": "4431",
+          "ФИО": "Иванов Иван Иванович",
+          "ЛР": "ЛР1",
+          "Пар№": "2",
+          "Статус": "ждёт"
+        }
+      ],
+      "history": [],
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/__harness__/health"
+        },
+        {
+          "method": "GET",
+          "path": "/__harness__/health"
+        },
+        {
+          "method": "GET",
+          "path": "/courses"
+        },
+        {
+          "method": "GET",
+          "path": "/courses/review-c01/groups"
+        },
+        {
+          "method": "GET",
+          "path": "/courses/review-c01/groups/4431/labs"
+        },
+        {
+          "method": "POST",
+          "path": "/courses/review-c01/groups/4431/register"
+        },
+        {
+          "method": "POST",
+          "path": "/courses/review-c01/groups/4431/labs/1/grade"
+        },
+        {
+          "method": "GET",
+          "path": "/courses/review-c01/groups/4431/labs/1/queue/status"
+        },
+        {
+          "method": "POST",
+          "path": "/courses/review-c01/groups/4431/labs/1/queue/register"
+        },
+        {
+          "method": "GET",
+          "path": "/courses/review-c01/groups/4431/labs/1/queue"
+        },
+        {
+          "method": "POST",
+          "path": "/admin/login"
+        },
+        {
+          "method": "GET",
+          "path": "/admin/check-auth"
+        },
+        {
+          "method": "GET",
+          "path": "/admin/courses/review-c01/queue/today"
+        },
+        {
+          "method": "POST",
+          "path": "/admin/courses/review-c01/groups/4431/labs/1/queue/set-status"
+        },
+        {
+          "method": "GET",
+          "path": "/courses/review-c01/groups/4431/labs/1/queue"
+        },
+        {
+          "method": "GET",
+          "path": "/__harness__/state"
+        }
+      ]
+    }
+  ],
+  "reset": [
+    200,
+    {
+      "ok": true,
+      "state": {
+        "course": {
+          "id": "review-c01",
+          "name": "Synthetic Review Course",
+          "groups": [
+            "4431",
+            "4432"
+          ],
+          "labs": {
+            "1": {
+              "short-name": "ЛР1",
+              "github-prefix": "lab1"
+            }
+          },
+          "spreadsheet": "review-c01-sheet"
+        },
+        "today": "2026-11-11",
+        "session": {
+          "slot_id": "review-slot-2",
+          "starts_at": "2026-11-11T10:40:00",
+          "ends_at": "2026-11-11T12:10:00",
+          "room": "A-101"
+        },
+        "roster": {
+          "4431": [
+            {
+              "row": 3,
+              "fio": "Иванов Иван Иванович",
+              "github": ""
+            },
+            {
+              "row": 4,
+              "fio": "Петрова Полина Сергеевна",
+              "github": "review-petrova"
+            },
+            {
+              "row": 5,
+              "fio": "Сидоров Олег Петрович",
+              "github": ""
+            }
+          ],
+          "4432": [
+            {
+              "row": 3,
+              "fio": "Альфа Алина Андреевна",
+              "github": ""
+            },
+            {
+              "row": 4,
+              "fio": "Бета Борис Борисович",
+              "github": "review-beta"
+            }
+          ]
+        },
+        "queue": [
+          {
+            "ПОЗИЦИЯ": "1",
+            "ГРУППА": "4431",
+            "ФИО": "Петрова Полина Сергеевна",
+            "ЛР": "ЛР1",
+            "Пар№": "2",
+            "Статус": "ждёт"
+          }
+        ],
+        "history": [],
+        "calls": []
+      }
+    }
+  ],
+  "state_after_reset": [
+    200,
+    {
+      "course": {
+        "id": "review-c01",
+        "name": "Synthetic Review Course",
+        "groups": [
+          "4431",
+          "4432"
+        ],
+        "labs": {
+          "1": {
+            "short-name": "ЛР1",
+            "github-prefix": "lab1"
+          }
+        },
+        "spreadsheet": "review-c01-sheet"
+      },
+      "today": "2026-11-11",
+      "session": {
+        "slot_id": "review-slot-2",
+        "starts_at": "2026-11-11T10:40:00",
+        "ends_at": "2026-11-11T12:10:00",
+        "room": "A-101"
+      },
+      "roster": {
+        "4431": [
+          {
+            "row": 3,
+            "fio": "Иванов Иван Иванович",
+            "github": ""
+          },
+          {
+            "row": 4,
+            "fio": "Петрова Полина Сергеевна",
+            "github": "review-petrova"
+          },
+          {
+            "row": 5,
+            "fio": "Сидоров Олег Петрович",
+            "github": ""
+          }
+        ],
+        "4432": [
+          {
+            "row": 3,
+            "fio": "Альфа Алина Андреевна",
+            "github": ""
+          },
+          {
+            "row": 4,
+            "fio": "Бета Борис Борисович",
+            "github": "review-beta"
+          }
+        ]
+      },
+      "queue": [
+        {
+          "ПОЗИЦИЯ": "1",
+          "ГРУППА": "4431",
+          "ФИО": "Петрова Полина Сергеевна",
+          "ЛР": "ЛР1",
+          "Пар№": "2",
+          "Статус": "ждёт"
+        }
+      ],
+      "history": [],
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/__harness__/state"
+        }
+      ]
+    }
+  ],
+  "static_index": [
+    200,
+    true
+  ],
+  "static_bundle_rewrite": {
+    "status": 200,
+    "has_harness_api": true,
+    "has_stock_api": false
+  },
+  "static_relative_api": [
+    404,
+    {
+      "detail": "harness static origin has no /api proxy",
+      "path": "/api/v1/courses",
+      "hint": "the stock nginx.conf has no API proxy either"
+    }
+  ]
+}

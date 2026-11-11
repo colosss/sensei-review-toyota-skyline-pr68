@@ -1,0 +1,9 @@
+repro/T01/test_t01_teams_isolation.py::test_team_member_resolution_is_lab_scoped_and_case_insensitive PASSED [ 12%]
+repro/T01/test_t01_teams_isolation.py::test_unreadable_roster_blocks_instead_of_silently_reporting_no_team PASSED [ 25%]
+repro/T01/test_t01_teams_isolation.py::test_individual_lab_returns_none_without_github_calls PASSED [ 37%]
+repro/T01/test_t01_teams_isolation.py::test_team_title_uniqueness_makes_the_queue_title_identity_safe PASSED [ 50%]
+repro/T01/test_t01_teams_isolation.py::test_team_list_cache_is_keyed_by_org_and_prefix PASSED [ 62%]
+repro/T01/test_t01_teams_isolation.py::test_team_rows_are_isolated_by_group_and_lab PASSED [ 75%]
+repro/T01/test_t01_teams_isolation.py::test_queue_cache_key_separates_course_group_lab_and_day PASSED [ 87%]
+repro/T01/test_t01_teams_isolation.py::test_lock_keys_scope_and_serialize PASSED [100%]
+============================== 8 passed in 1.13s ===============================

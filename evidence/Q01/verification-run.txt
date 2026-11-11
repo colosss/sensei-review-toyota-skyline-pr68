@@ -1,0 +1,36 @@
+Q01 independent verification run — actor deepseek-order2-V
+SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Receipt: scratch/pipeline/Q01/runs/827a85f24bf14c94957324acd2bda70c.json
+Log: scratch/pipeline/Q01/runs/827a85f24bf14c94957324acd2bda70c.log
+
+Command (only the assigned file; source/tests wrapper was not run):
+.venv/bin/python scripts/review_pipeline.py run Q01 \
+  --actor deepseek-order2-V --timeout 120 \
+  --artifact repro/C06/c06_fake_sheets.py \
+  --artifact repro/C06/conftest.py \
+  --artifact repro/C06/test_c06_session_scope.py -- \
+  .venv/bin/python scripts/run_review_tests.py \
+  repro/C06/test_c06_session_scope.py -v --tb=short
+
+Environment: Python 3.12.13, pytest 9.2.0; disposable hash-pinned
+scratch/runtime/app; external sockets blocked. Baseline clean before/after.
+Exit 1 (expected failing regression), timeout=false.
+
+Inputs (unchanged author files; equal to deepseek-queue-B's full-C06 receipt):
+  repro/C06/c06_fake_sheets.py        036c6fabb786585ab7f7c2cab5ebd6f3a4f27b0953f867b180381b72b8d3054f
+  repro/C06/conftest.py               03d36f268275b8ec5442048956d21e1ae325b5abf5399052906bca51b06ff297
+  repro/C06/test_c06_session_scope.py 0a892872da337cea8b1b5d6fcae7186b94ab3fc86d9d76a8ef4b4432f77716cc
+
+Result: 1 failed, 1 passed, 1 warning in 0.12s.
+  PASSED test_observed_two_pairs_in_one_day_give_duplicate_positions
+  FAILED test_regression_position_is_unique_for_one_group_lab_day
+
+Failure:
+  desired: positions shown for one group/lab/day are unique;
+  actual positions [1, 1] for rows of sessions [1, 2],
+  while status reports position 1 of 2
+  assert 1 == 2
+
+The observation test confirms the scenario (two registrations in pairs 1 and 2
+of the same lab; both get position 1; status is position 1 of 2). The failure is
+a contract assertion, not setup/import/collection.

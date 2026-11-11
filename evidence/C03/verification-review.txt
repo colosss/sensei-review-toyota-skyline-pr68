@@ -1,0 +1,56 @@
+C03 independent review — requirement, fake contract, strongest objection
+Actor: deepseek-gates-V. SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d.
+
+Requirement / real call path
+- source/grading/queue/ci.py:43-46 says the verdict comes from
+  outcome.passed; :78-108 raises CI_PENDING / CI_CHECK_FAILED / CI_NOT_PASSED
+  on non-passing outcomes.
+- The producer is real: source/grading/bulk.py:352-359 builds StudentOutcome
+  with passed=ci_evaluation.grade_result.passed; source/grading/grader.py:612-621
+  sets passed=result_string; source/grading/ci_checker.py:362-373 formats
+  "N/M тестов пройдено" (a non-empty string in both pass and fail cases).
+- The PR's own unit test source/tests/test_ci.py:70-87 asserts CI_NOT_PASSED
+  for StudentOutcome(status="updated", cell_value="x", passed=False), i.e.
+  the intended contract is boolean pass/fail, not "non-empty string".
+- source/main.py:3284-3302 calls ensure_ci_passed before writing the waiting
+  queue row; that is the enforcement point.
+
+Fake shape/type audit (no contract mismatch found)
+- FakeGitHubTransport returns the URLs GitHubClient actually builds:
+  /repos/{org}/{repo}/commits -> [{"sha": ...}];
+  /repos/{org}/{repo}/commits/{sha} -> {"files": []};
+  /repos/{org}/{repo}/commits/{sha}/check-runs -> {"check_runs": [...]}.
+- github_client.get_latest_commit reads commits_data[0]["sha"] and files;
+  get_check_runs returns .json().get("check_runs", []) — list[dict].
+- ci_checker.parse_check_runs reads name, conclusion, html_url, completed_at
+  and converts the ISO-Z timestamp. The fake supplies these fields with the
+  same types (completed_at is a string in the JSON payload).
+- FakeResponse has no headers, but is_rate_limited/headers are only consulted
+  on the 403 path; this run returns 200/404 only and does not hit it.
+- FakeWorksheet implements row_values, col_values, cell/update_cell,
+  append_row, batch_update, get_all_values and fetch_sheet_metadata(locale),
+  which are the methods used by the queue/Sheets context in this test.
+- The fake does not replace the app API or the CI evaluator: only the GitHub
+  HTTP transport and the data-source seams are synthetic.
+
+Strongest reasonable objection
+"passed is a human-readable string by design; treating a non-empty '0/1
+тестов пройдено' as success might be intentional, and the queue may only
+gate on status, not on pass/fail."
+
+Answer
+- ci.py explicitly documents the opposite (verdict from outcome.passed;
+  stable non-passing code), and the PR's own test_ci expects CI_NOT_PASSED.
+- The controls separate status from verdict: pending (conclusion=None) gives
+  409 CI_PENDING; success gives 200 + "v"; completed failure gives 200 + "x"
+  and a waiting row. So the failure is the truthiness of the formatted string,
+  not a wrong status branch.
+- The protected-cell case reproduces independently of writing "x": with an
+  existing "v", the red current-HEAD CI still admits (200), although ci.py
+  says a protected cell is admitted only when current-HEAD CI is green.
+- Scope limitation: one individual lab with explicit ci.jobs ["test"], no
+  score/taskid/penalty. The performance/GitHub-request-count hypothesis is
+  not claimed here.
+
+Verdict: confirmed. The author's 2 failed / 2 passed result is independently
+reproduced on the pinned SHA with unchanged test bytes and the real CI path.

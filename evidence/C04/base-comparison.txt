@@ -1,0 +1,31 @@
+C04 base comparison (read-only git, source/ at 20bea22)
+Base commit: eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39
+
+$ git -C source merge-base --is-ancestor eef98bb HEAD && echo BASE_IS_ANCESTOR
+BASE_IS_ANCESTOR
+
+$ git -C source show eef98bb:main.py | grep -n "STUDENT_SESSION\|build_student_session\|parse_student_session\|def queue_register\|def queue_withdraw\|def queue_shift"
+NONE
+
+$ git -C source show eef98bb:grading/queue/session.py
+fatal: path 'grading/queue/session.py' exists on disk, but not in 'eef98bb...'
+
+$ git -C source show eef98bb:main.py | sed -n '/def register_student/,/def grade_lab/p' | grep -n "set_cookie\|409\|update_cell\|existing_github"
+71:        existing_github = sheet.cell(row_idx, github_col_idx).value
+73:        if not existing_github:
+74:            sheet.update_cell(row_idx, github_col_idx, student.github)
+78:        if existing_github == student.github:
+86:        logger.warning(f"GitHub conflict for '{full_name}': existing='{existing_github}', attempted='{student.github}'")
+88:            status_code=409,
+
+C04 interpretation:
+- Base public registration already binds a GitHub login to an existing ФИО row
+  and rejects a different login (409). That inherited behaviour is not, by
+  itself, the finding.
+- Base registration sets no cookie; base has no queue session module and no
+  queue register/withdraw/shift routes.
+- The PR adds build_student_session issuance at main.py:1013-1055 and the queue
+  routes that authorize from that cookie (main.py:2940-2945, 3251, 3332, 3380).
+  Therefore the capability "self-asserted public form data grants queue
+  authority over another student's record" is introduced by the PR, enabled by
+  the inherited registration trust boundary.

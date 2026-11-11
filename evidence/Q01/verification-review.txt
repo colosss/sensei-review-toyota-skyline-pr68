@@ -1,0 +1,48 @@
+Q01 independent review — source contract, comparison, objection
+Actor: deepseek-order2-V. SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d.
+The packet discovery is still pending; the scope below comes from
+scratch/pipeline/C06/split-proposal.json, Q01 object, and the unchanged test.
+
+Requirement / real path
+- store.register computes the new position from list_waiting(..., session_no)
+  (source/grading/queue/store.py:426-427); session_no comes from the active
+  slot in source/main.py:3277.
+- Reading and mutation paths do not apply the same key:
+  queue_status list_waiting(rows, group, lab) (main.py:3101),
+  queue_status find_waiting(...) without session (main.py:3169),
+  withdraw passes session_no=None (main.py:3352,3357),
+  shift calls list_waiting without session (store.py:488-491 via main.py:3404),
+  and the register response recomputes list_waiting with session (main.py:3318).
+- The daily queue sheet survives the whole day; the store has no close-pair
+  operation, so pair-1 rows stay "ждёт" when pair 2 starts.
+
+Observed contract violation
+- One group/lab/day receives two waiting rows with position 1 (sessions 1 and
+  2), while queue_status reports position 1 of 2. The test drives the real
+  HTTP endpoints; only schedule clock, Sheets and CI are seams.
+
+Base comparison (independent)
+- git cat-file base:grading/queue/store.py -> exit 128 (file absent in
+  eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39).
+- base main.py has zero queue route matches; diff base..pinned adds
+  store.py +678, main.py +1248/-13, QueueSection.jsx +368, api/index.js +67/-1.
+- The numbering-key logic is introduced by this PR.
+
+Strongest reasonable objection
+"Positions may be intentionally per class pair; then pair-1 and pair-2 rows are
+two independent queues, and the list/status are simply showing the whole day."
+
+Answer
+- If positions are per pair, reads and renumbering must also filter by pair.
+  Today queue_status/queue_list/withdraw/shift/set-status use session_no=None
+  while register uses session_no, so the same screen mixes both keys.
+- The UI has no pair label/filter in the displayed list; it renders entry.position
+  as the queue number (QueueSection.jsx:330,350), and queue_size is computed
+  without session (main.py:3101), producing "position 1 of 2" with two 1s.
+- The previous-pair rows are not moved to history/closed anywhere in the
+  tested path, so the duplicate state is reachable by normal day progression.
+- This packet is only the session-scope cause; it is not list-scope (C06) and
+  not the set-status argument bug (Q02).
+
+Limits: synthetic Sheets + TestClient, deterministic session clock; no real
+Sheets/browser/network. One group, one lab, two pairs.

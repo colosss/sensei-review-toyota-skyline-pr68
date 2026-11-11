@@ -1,0 +1,7 @@
+repro/S01/test_schedule_gate.py::test_control_no_correction_allows_any_lab PASSED [ 25%]
+repro/S01/test_schedule_gate.py::test_control_time_window_closes_after_auto_close PASSED [ 50%]
+repro/S01/test_schedule_gate.py::test_control_correction_works_for_explicit_lab_list PASSED [ 75%]
+repro/S01/test_schedule_gate.py::test_cancelled_lab_must_be_closed_for_all_labs_slot FAILED [100%]
+E   AssertionError: desired contract: schedule-config.md says remove_slots[].labs cancels only those labs in the slot, so lab 3 must be closed; actual: register HTTP 200 ({"position":1,"queue_size":1}), queue rows for ЛР3 [('Студент Дельта', 'ЛР3', 'ждёт')]
+FAILED repro/S01/test_schedule_gate.py::test_cancelled_lab_must_be_closed_for_all_labs_slot
+==================== 1 failed, 3 passed, 1 warning in 7.39s ====================

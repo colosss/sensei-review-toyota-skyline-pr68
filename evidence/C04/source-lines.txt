@@ -1,0 +1,88 @@
+C04 source locations (source/ at 20bea22cf4a1cbc19634a984883ff52764ce9d6d)
+
+--- source/main.py:1013-1055 (public registration issues a queue session) ---
+1013  existing_github = sheet.cell(row_idx, github_col_idx).value
+1015  # Build signed student_session cookie from the registration form data.
+1016  # The queue reads this cookie instead of requiring a separate GitHub OAuth.
+1017  student_token = build_student_session(
+1018      signer,
+1019      github=student.github,
+1020      fio=full_name,
+1021      course_id=course_id,
+1022      group_id=group_id,
+1023  )
+1025  if not existing_github:
+1026      sheet.update_cell(row_idx, github_col_idx, student.github)
+1029      response.set_cookie(
+1030          key=STUDENT_SESSION_COOKIE,
+1040  if existing_github == student.github:
+1041      logger.info(f"Student '{full_name}' already registered with GitHub '{student.github}'")
+1042      response = JSONResponse(content={
+1043          "status": "already_registered",
+1046      response.set_cookie(
+1047          key=STUDENT_SESSION_COOKIE,
+1057  # Conflict: student tries to set a different GitHub account
+1059  raise HTTPException(
+1060      status_code=409,
+
+--- source/main.py:1000-1006 (the only "proof": the login exists) ---
+1000  try:
+1001      github_response = requests.get(
+1002          f"https://api.github.com/users/{student.github}", timeout=GITHUB_REQUEST_TIMEOUT
+1003      )
+1004      if github_response.status_code != 200:
+1006          raise HTTPException(status_code=404, detail="Пользователь GitHub не найден")
+
+--- source/main.py:2940-2945 (authorization used by the queue) ---
+2940  def _require_student_session(request, course_id, group_id):
+2941      cookie = request.cookies.get(STUDENT_SESSION_COOKIE)
+2942      payload = parse_student_session(signer, cookie)
+2943      if payload is None or payload.get("course_id") != course_id or payload.get("group_id") != group_id:
+2944          raise HTTPException(status_code=401, detail="SESSION_REQUIRED")
+2945      return payload["github"], payload.get("fio", "")
+
+--- source/main.py queue endpoints calling it ---
+3251  username, _fio = _require_student_session(request, course_id, group_id)   # register
+3332  username, _fio = _require_student_session(request, course_id, group_id)   # withdraw
+3380  username, _fio = _require_student_session(request, course_id, group_id)   # shift
+
+--- source/grading/queue/session.py:55-72 (signed scoped session contract) ---
+55  def require_queue_session(
+56      signer: TimestampSigner,
+57      cookie_value: str | None,
+58      course_id: str,
+59      group_id: str,
+60      lab_key: str,
+61  ) -> str:
+62      payload = parse_queue_session(signer, cookie_value)
+63      if payload is None or any(
+...
+71          raise QueueError("SESSION_REQUIRED", "Нет действующей сессии очереди")
+72      return payload["username"]
+
+--- HEAD: the OAuth queue session is written but never enforced ---
+$ grep -rn "queue_session\|require_queue_session\|QUEUE_SESSION_COOKIE" --include='*.py' source | grep -v tests/
+main.py:133-135            import (never called)
+main.py:2903               QUEUE_SESSION_COOKIE = "queue_session"
+main.py:3605-3606          set_cookie(... build_queue_session ...) in _handle_queue_callback
+=> register/withdraw/shift never read QUEUE_SESSION_COOKIE or call
+   require_queue_session; the OAuth-verified identity is dead code for the queue.
+
+--- source/main.py:3433-3444 (public queue list exposes exact ФИО) ---
+3433  return {
+3434      "queue": [
+3435          {
+3436              "position": r.position,
+3437              "group": r.group,
+3438              "fio": r.fio,
+...
+3447      "queue_open": True,
+3448  }
+
+--- source/docs/hackathon/ADR-queue-storage.md:23-28 ---
+23  - **Кто читает:** студенты — свой статус и позицию (часто, при каждом
+24    обновлении страницы); преподаватель — весь список очереди (постоянно
+25    во время занятия).
+26  - **Кто пишет:** студенты — записываются, выходят, сдвигаются
+27    (несколько раз за занятие); преподаватель — отмечает результат защиты
+28    (для каждого студента один раз в конце).

@@ -1,0 +1,36 @@
+C06 narrow independent verification run (list scope only) — actor deepseek-order2-V
+SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Receipt: scratch/pipeline/C06/runs/c72c57139e424c3cae1b5da561aedd13.json
+Log: scratch/pipeline/C06/runs/c72c57139e424c3cae1b5da561aedd13.log
+
+Command (whole assigned file, all 3 tests; source/tests wrapper not run):
+.venv/bin/python scripts/review_pipeline.py run C06 \
+  --actor deepseek-order2-V --timeout 120 \
+  --artifact repro/C06/c06_fake_sheets.py \
+  --artifact repro/C06/conftest.py \
+  --artifact repro/C06/test_c06_screenshot_chain.py -- \
+  .venv/bin/python scripts/run_review_tests.py \
+  repro/C06/test_c06_screenshot_chain.py -v --tb=short
+
+Environment: Python 3.12.13, pytest 9.2.0; disposable hash-pinned
+scratch/runtime/app; external sockets blocked. Baseline clean before/after.
+Exit 1 (expected failing regression), timeout=false.
+
+Inputs (unchanged author files; equal to deepseek-queue-B's full-C06 receipt):
+  repro/C06/c06_fake_sheets.py        036c6fabb786585ab7f7c2cab5ebd6f3a4f27b0953f867b180381b72b8d3054f
+  repro/C06/conftest.py               03d36f268275b8ec5442048956d21e1ae325b5abf5399052906bca51b06ff297
+  repro/C06/test_c06_screenshot_chain.py 66891b39bd97ad2910c40ee1de2a6f9385cb14f709615cce923b813c9bf7091f
+
+Result: 1 failed, 2 passed, 1 warning in 0.21s.
+  PASSED test_observed_screenshot_chain_reproduces_2_1_1_and_2_of_2
+  PASSED test_observed_list_mixes_other_groups_too
+  FAILED test_regression_lab_page_list_is_scoped_to_requested_group_and_lab
+
+Failure:
+  desired: the lab1 page must list only lab1 rows;
+  actual labs ['ЛР1', 'ЛР2', 'ЛР1'], positions [2, 1, 1],
+  status says 2 of 2
+  assert ['ЛР1','ЛР2','ЛР1'] == ['ЛР1','ЛР1','ЛР1']
+
+The two observations confirm the reported visual state and a cross-group leak;
+the failure is a contract assertion on the list scope, not setup/import.

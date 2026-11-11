@@ -1,0 +1,35 @@
+Q02 independent verification run — actor deepseek-order2-V
+SHA: 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Receipt: scratch/pipeline/Q02/runs/14afa6ea0693444b9a74cc56e5c07d26.json
+Log: scratch/pipeline/Q02/runs/14afa6ea0693444b9a74cc56e5c07d26.log
+
+Command (only the assigned file; source/tests wrapper was not run):
+.venv/bin/python scripts/review_pipeline.py run Q02 \
+  --actor deepseek-order2-V --timeout 120 \
+  --artifact repro/C06/c06_fake_sheets.py \
+  --artifact repro/C06/conftest.py \
+  --artifact repro/C06/test_c06_set_status_renumber.py -- \
+  .venv/bin/python scripts/run_review_tests.py \
+  repro/C06/test_c06_set_status_renumber.py -v --tb=short
+
+Environment: Python 3.12.13, pytest 9.2.0; disposable hash-pinned
+scratch/runtime/app; external sockets blocked. Baseline clean before/after.
+Exit 1 (expected failing regression), timeout=false.
+
+Inputs (unchanged author files; equal to deepseek-queue-B's full-C06 receipt):
+  repro/C06/c06_fake_sheets.py         036c6fabb786585ab7f7c2cab5ebd6f3a4f27b0953f867b180381b72b8d3054f
+  repro/C06/conftest.py                03d36f268275b8ec5442048956d21e1ae325b5abf5399052906bca51b06ff297
+  repro/C06/test_c06_set_status_renumber.py 61447529c85ca0af843e0cff6643d9458a239f7b8f3013c734fcba7c971bb22a
+
+Result: 1 failed, 1 passed, 1 warning in 0.13s.
+  PASSED test_observed_set_status_leaves_the_waiting_queue_at_position_2
+  FAILED test_regression_set_status_renumbers_the_remaining_waiting_queue
+
+Failure:
+  desired: the waiting queue is renumbered to 1..n after set-status;
+  actual waiting positions [2], status reports position 2 of 1
+  assert [2] == [1]
+
+The observation test confirms the scenario: after marking the first of two
+students "сдал", the remaining waiting student stays at position 2 while
+queue_size is 1. The failure is a contract assertion, not setup/import.

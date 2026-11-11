@@ -1,0 +1,12 @@
+repro/C03/test_ci_admission.py::test_control_passing_ci_admits_and_records_grade PASSED [ 25%]
+repro/C03/test_ci_admission.py::test_control_pending_ci_is_rejected PASSED [ 50%]
+repro/C03/test_ci_admission.py::test_failing_ci_must_not_admit FAILED [ 75%]
+repro/C03/test_ci_admission.py::test_protected_passing_cell_with_failing_current_ci_must_not_admit FAILED [100%]
+repro/C03/test_ci_admission.py:335: in test_failing_ci_must_not_admit
+E   AssertionError: desired contract: a student whose current HEAD CI did not pass must not enter the defense queue (CI_NOT_PASSED); actual: register HTTP 200 ({"position":1,"queue_size":1}), waiting rows [('Студент Гамма', 'ждёт')], grade cell after the call 'x'
+repro/C03/test_ci_admission.py:350: in test_protected_passing_cell_with_failing_current_ci_must_not_admit
+E   AssertionError: desired contract: an earlier passing run kept in a protected cell does not replace CI on the current HEAD; actual: register HTTP 200 ({"position":1,"queue_size":1}), waiting rows [('Студент Гамма', 'ждёт')], grade cell 'v'
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+FAILED repro/C03/test_ci_admission.py::test_failing_ci_must_not_admit
+FAILED repro/C03/test_ci_admission.py::test_protected_passing_cell_with_failing_current_ci_must_not_admit
+==================== 2 failed, 2 passed, 1 warning in 2.36s ====================

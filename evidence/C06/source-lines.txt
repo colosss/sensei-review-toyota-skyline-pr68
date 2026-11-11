@@ -1,0 +1,347 @@
+Pinned source: source/ @ 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+Base PR: eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39
+
+=== source/main.py:3094-3101 (queue_status reads) ===
+    # Session is active - create the sheet and get queue size
+    spreadsheet = _open_spreadsheet(course_info)
+    today_str = _ensure_queue_ready(spreadsheet, course_info, course_id)
+
+    worksheet = spreadsheet.worksheet(f"{QUEUE_SHEET_PREFIX}{today_str}")
+    rows = read_queue_rows(worksheet)
+    lab_short_name = lab_config.get("short-name", lab_key)
+    waiting = list_waiting(rows, group_id, lab_short_name)
+
+=== source/main.py:3169 (status resolves entry by FIO, no session) ===
+    entry = find_waiting(rows, group_id, lab_short_name, fio) if fio else None
+
+=== source/main.py:3211-3223 (status response position/queue_size) ===
+    return {
+        "in_queue": entry is not None,
+        "position": entry.position if entry else None,
+        "queue_size": len(waiting),
+        "ci_status": ci_status,
+        "can_register": can_register,
+        "already_passed": already_passed,
+        "is_team_lab": team_lab,
+        "team": team_info,
+        "queue_open": queue_open,
+        "session": _session_dict(session) if session else None,
+        "next_session": _session_dict(next_sess) if next_sess else None,
+    }
+
+=== source/main.py:3416-3448 (GET list: no group/lab filter) ===
+@app.get("/courses/{course_id}/groups/{group_id}/labs/{lab_id}/queue")
+@limiter.limit("30/minute")
+def queue_list(request: Request, course_id: str, group_id: str, lab_id: str):
+    """List the active queue for a group and lab. Public - no session required."""
+    course_info, lab_key, lab_config = _resolve_queue_lab(course_id, lab_id)
+
+    # Only create the sheet if there is an active session
+    session = _queue_active_session(course_id, group_id, lab_key)
+    if session is None:
+        return {"queue": [], "size": 0, "is_team_lab": is_team_lab(lab_config), "queue_open": False}
+
+    spreadsheet = _open_spreadsheet(course_info)
+    today_str = _ensure_queue_ready(spreadsheet, course_info, course_id)
+
+    worksheet = spreadsheet.worksheet(f"{QUEUE_SHEET_PREFIX}{today_str}")
+    rows = read_queue_rows(worksheet)
+
+    return {
+        "queue": [
+            {
+                "position": r.position,
+                "group": r.group,
+                "fio": r.fio,
+                "lab": r.lab,
+                "session_no": r.session_no,
+                "status": r.status,
+            }
+            for r in rows
+        ],
+        "size": len(rows),
+        "is_team_lab": is_team_lab(lab_config),
+        "queue_open": True,
+    }
+
+=== source/main.py:3269-3280,3304-3320 (register uses session_no) ===
+                sheets_client, course_info, group_id, lab_config, username
+            )
+            fio = ctx.fio
+            identifier = fio
+    except QueueError as e:
+        raise _queue_error_to_http(e)
+
+    lab_short_name = lab_config.get("short-name", lab_key)
+    session_no = session_no_from_slot(session.slot_id) if session else None
+
+    # Check ALREADY_PASSED
+    history_ws = ensure_history_sheet(spreadsheet)
+    # Register in queue
+    from datetime import date
+    today = date.fromisoformat(today_str)
+    group_ids = _schedule_group_ids(course_id)
+    try:
+        position = _queue_register(
+            spreadsheet, today, group_id, fio, lab_short_name, session_no, group_ids
+        )
+    except QueueError as e:
+        raise _queue_error_to_http(e)
+
+    _invalidate_queue_cache(spreadsheet.id, course_id, group_id, lab_key, today_str)
+
+    worksheet = spreadsheet.worksheet(f"{QUEUE_SHEET_PREFIX}{today_str}")
+    waiting = list_waiting(read_queue_rows(worksheet), group_id, lab_short_name, session_no)
+
+    return {"position": position, "queue_size": len(waiting)}
+
+=== source/main.py:3400-3411 (shift: no session_no) ===
+    from datetime import date
+    today = date.fromisoformat(today_str)
+
+    try:
+        old_pos, new_pos = _queue_shift_down(
+            spreadsheet, today, group_id, fio, lab_short_name, body.delta
+        )
+    except QueueError as e:
+        raise _queue_error_to_http(e)
+
+    _invalidate_queue_cache(spreadsheet.id, course_id, group_id, lab_key, today_str)
+    return {"old_position": old_pos, "new_position": new_pos}
+
+=== source/main.py:3526-3532 (set-status call passes group_ids positionally) ===
+    group_ids = _schedule_group_ids(course_id)
+
+    try:
+        _queue_set_status(
+            spreadsheet, today, group_id, body.identifier, lab_short_name, body.status, group_ids
+        )
+    except QueueError as e:
+
+=== source/grading/queue/store.py:270-287 (list_waiting scope) ===
+def list_waiting(
+    rows: Iterable[QueueRow],
+    group: str,
+    lab: str,
+    session_no: int | None = None,
+) -> list[QueueRow]:
+    """Waiting entries for *(group, lab)*, optionally filtered by session number."""
+    return sorted(
+        (
+            row
+            for row in rows
+            if row.group == group
+            and row.lab == lab
+            and row.status == STATUS_WAITING
+            and (session_no is None or row.session_no == session_no)
+        ),
+        key=lambda row: (row.position or 0, row.row_index),
+    )
+
+=== source/grading/queue/store.py:384-397 (_renumber_waiting: waiting only) ===
+def _renumber_waiting(
+    worksheet,
+    group: str,
+    lab: str,
+    session_no: int | None = None,
+) -> None:
+    rows = read_queue_rows(worksheet)
+    waiting = list_waiting(rows, group, lab, session_no)
+    updates = [
+        {"range": f"A{row.row_index}", "values": [[position]]}
+        for position, row in enumerate(waiting, start=1)
+        if row.position != position
+    ]
+    _write_cells(worksheet, updates)
+
+=== source/grading/queue/store.py:400-433 (register position per session) ===
+def register(
+    spreadsheet,
+    today: date,
+    group: str,
+    fio: str,
+    lab: str,
+    session_no: int | None = None,
+    group_ids: Iterable[str] = (),
+) -> int:
+    """Append a waiting row and return its 1-based position."""
+    with locked_course(spreadsheet.id):
+        worksheet = ensure_today_sheet(spreadsheet, today, group_ids)
+        rows = read_queue_rows(worksheet)
+        # Duplicate check ignores session_no: a student cannot be waiting
+        # twice for the same lab on the same day, even across sessions.
+        already_waiting = [
+            row
+            for row in rows
+            if row.group == group
+            and row.lab == lab
+            and row.fio == fio
+            and row.status == STATUS_WAITING
+        ]
+        if already_waiting:
+            raise QueueError("ALREADY_IN_QUEUE", "Участник уже ожидает")
+
+        waiting = list_waiting(rows, group, lab, session_no)
+        position = len(waiting) + 1
+        worksheet.append_row(
+            [position, group, fio, lab, session_no or "", STATUS_WAITING],
+            value_input_option="RAW",
+            table_range="A1:F",
+        )
+        return position
+
+=== source/grading/queue/store.py:436-468 (withdraw renumber) ===
+def withdraw(
+    spreadsheet,
+    today: date,
+    group: str,
+    fio: str,
+    lab: str,
+    session_no: int | None = None,
+    group_ids: Iterable[str] = (),
+) -> None:
+    with locked_course(spreadsheet.id):
+        worksheet = ensure_today_sheet(spreadsheet, today, group_ids)
+        rows = read_queue_rows(worksheet)
+        matching = [
+            row
+            for row in rows
+            if row.group == group and row.lab == lab and row.fio == fio
+        ]
+        waiting = [row for row in matching if row.status == STATUS_WAITING]
+        if not waiting:
+            if matching:
+                raise QueueError("NOT_WAITING", "Запись больше не ожидает")
+            raise QueueError("NOT_IN_QUEUE", "Ожидающая запись не найдена")
+        if len(waiting) > 1:
+            raise QueueError(
+                "AMBIGUOUS_STUDENT",
+                "Найдено несколько ожидающих записей с этим ФИО",
+            )
+        row = waiting[0]
+        _write_cells(
+            worksheet,
+            [{"range": f"F{row.row_index}", "values": [[STATUS_WITHDRAWN]]}],
+        )
+        _renumber_waiting(worksheet, group, lab, session_no)
+
+=== source/grading/queue/store.py:486-504 (shift scope) ===
+    with locked_course(spreadsheet.id):
+        worksheet = ensure_today_sheet(spreadsheet, today, group_ids)
+        waiting = list_waiting(
+            read_queue_rows(worksheet), group, lab, session_no
+        )
+        row = _unique_row(waiting, group, lab, fio, session_no)
+        current_index = waiting.index(row)
+        new_index = min(current_index + delta, len(waiting) - 1)
+        if new_index == current_index:
+            raise QueueError("INVALID_SHIFT", "Участник уже в конце очереди")
+
+        reordered = list(waiting)
+        reordered.insert(new_index, reordered.pop(current_index))
+        updates = [
+            {"range": f"A{entry.row_index}", "values": [[position]]}
+            for position, entry in enumerate(reordered, start=1)
+        ]
+        _write_cells(worksheet, updates)
+        return current_index + 1, new_index + 1
+
+=== source/grading/queue/store.py:507-543 (set_status signature and renumber) ===
+def set_status(
+    spreadsheet,
+    today: date,
+    group: str,
+    fio: str,
+    lab: str,
+    status: str,
+    session_no: int | None = None,
+    group_ids: Iterable[str] = (),
+) -> None:
+    if status not in ADMIN_STATUSES:
+        raise QueueError("INVALID_STATUS", f"Недопустимый статус: {status!r}")
+
+    with locked_course(spreadsheet.id):
+        worksheet = ensure_today_sheet(spreadsheet, today, group_ids)
+        rows = read_queue_rows(worksheet)
+        matching = [
+            row
+            for row in rows
+            if row.group == group and row.lab == lab and row.fio == fio
+        ]
+        waiting = [row for row in matching if row.status == STATUS_WAITING]
+        if not waiting:
+            if matching:
+                raise QueueError("NOT_WAITING", "Запись больше не ожидает")
+            raise QueueError("NOT_IN_QUEUE", "Ожидающая запись не найдена")
+        if len(waiting) > 1:
+            raise QueueError(
+                "AMBIGUOUS_STUDENT",
+                "Найдено несколько ожидающих записей с этим ФИО",
+            )
+        row = waiting[0]
+        _write_cells(
+            worksheet,
+            [{"range": f"F{row.row_index}", "values": [[status]]}],
+        )
+        _renumber_waiting(worksheet, group, lab, session_no)
+
+=== source/frontend/.../registration-form/QueueSection.jsx:80-96,328-359 ===
+  const reload = useCallback(async () => {
+    setError(null);
+    try {
+      const [currentStatus, queueData] = await Promise.all([
+        fetchDefenseQueueStatus(courseId, groupId, labId),
+        fetchDefenseQueue(courseId, groupId, labId),
+      ]);
+      setStatus(validateStatus(currentStatus));
+      setQueue(normalizeQueue(queueData));
+    } catch (requestError) {
+      setStatus(null);
+      setQueue([]);
+      setError(requestError);
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId, groupId, labId]);
+...
+                <List disablePadding>
+                  {queue.map((entry, index) => {
+                    const position = entry.position ?? index + 1;
+                    return (
+                      <ListItem
+                        key={`${entry.fio}-${entry.lab}-${index}`}
+                        divider={index < queue.length - 1}
+                        disableGutters
+                        secondaryAction={
+                          entry.status && (
+                            <Chip
+                              size="small"
+                              label={t(`queue.statuses.${entry.status}`, {
+                                defaultValue: entry.status,
+                              })}
+                            />
+                          )
+                        }
+                      >
+                        <ListItemText
+                          primary={
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Chip size="small" label={position} />
+                              <Typography component="span" variant="body2">
+                                {entryName(entry) || t("queue.unnamedEntry")}
+                              </Typography>
+                            </Stack>
+                          }
+                        />
+                      </ListItem>
+                    );
+                  })}
+
+=== source/frontend/.../api/index.js:45-46,88-92 (UI URLs) ===
+const defenseQueueUrl = (courseId, groupId, labId) =>
+  `${API_BASE_URL}/courses/${encodeURIComponent(courseId)}/groups/${encodeURIComponent(groupId)}/labs/${encodeURIComponent(labId)}/queue`;
+export const fetchDefenseQueueStatus = (courseId, groupId, labId) =>
+  requestDefenseQueue(`${defenseQueueUrl(courseId, groupId, labId)}/status`);
+
+export const fetchDefenseQueue = (courseId, groupId, labId) =>
+  requestDefenseQueue(defenseQueueUrl(courseId, groupId, labId));

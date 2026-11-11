@@ -1,0 +1,57 @@
+C06 API/UI scope inventory (pinned 20bea22).
+
+--- UI calls (source/frontend/courses-front/src/api/index.js) ---
+45:const defenseQueueUrl = (courseId, groupId, labId) =>
+88:export const fetchDefenseQueueStatus = (courseId, groupId, labId) =>
+89:  requestDefenseQueue(`${defenseQueueUrl(courseId, groupId, labId)}/status`);
+91:export const fetchDefenseQueue = (courseId, groupId, labId) =>
+92:  requestDefenseQueue(defenseQueueUrl(courseId, groupId, labId));
+95:  requestDefenseQueue(`${defenseQueueUrl(courseId, groupId, labId)}/register`, {
+100:  requestDefenseQueue(`${defenseQueueUrl(courseId, groupId, labId)}/withdraw`, {
+105:  requestDefenseQueue(`${defenseQueueUrl(courseId, groupId, labId)}/shift`, {
+324:    `${API_BASE_URL}/courses/${courseId}/groups/${groupId}/register`,
+
+--- UI reads status+list together and renders stored position ---
+20:  fetchDefenseQueueStatus,
+84:        fetchDefenseQueueStatus(courseId, groupId, labId),
+85:        fetchDefenseQueue(courseId, groupId, labId),
+103:      fetchDefenseQueueStatus(courseId, groupId, labId),
+104:      fetchDefenseQueue(courseId, groupId, labId),
+330:                    const position = entry.position ?? index + 1;
+350:                              <Chip size="small" label={position} />
+
+--- backend scopes ---
+3099:    rows = read_queue_rows(worksheet)
+3101:    waiting = list_waiting(rows, group_id, lab_short_name)
+3169:    entry = find_waiting(rows, group_id, lab_short_name, fio) if fio else None
+3277:    session_no = session_no_from_slot(session.slot_id) if session else None
+3309:        position = _queue_register(
+3318:    waiting = list_waiting(read_queue_rows(worksheet), group_id, lab_short_name, session_no)
+3357:        _queue_withdraw(spreadsheet, today, group_id, fio, lab_short_name, session_no)
+3404:        old_pos, new_pos = _queue_shift_down(
+3431:    rows = read_queue_rows(worksheet)
+3471:    rows = read_queue_rows(worksheet)
+3529:        _queue_set_status(
+
+--- store profile ---
+270:def list_waiting(
+384:def _renumber_waiting(
+391:    waiting = list_waiting(rows, group, lab, session_no)
+400:def register(
+426:        waiting = list_waiting(rows, group, lab, session_no)
+436:def withdraw(
+471:def shift_down(
+507:def set_status(
+
+--- read-through cache usage in main.py (import/invalidate only) ---
+93:    get_queue as _get_queue_cache,
+94:    invalidate_queue as _invalidate_queue_cache,
+95:    invalidate_course as _invalidate_course_queue_cache,
+3008:    _invalidate_course_queue_cache(spreadsheet.id, course_id)
+3315:    _invalidate_queue_cache(spreadsheet.id, course_id, group_id, lab_key, today_str)
+3361:    _invalidate_queue_cache(spreadsheet.id, course_id, group_id, lab_key, today_str)
+3410:    _invalidate_queue_cache(spreadsheet.id, course_id, group_id, lab_key, today_str)
+3535:    _invalidate_queue_cache(spreadsheet.id, course_id, group_id, lab_key, today_str)
+3564:    _invalidate_course_queue_cache(spreadsheet.id, course_id)
+
+Interpretation: /queue/status is scoped to group+lab but not session; /queue is scoped to no group/lab/session; register is scoped to group+lab+session; withdraw/shift/set-status are group+lab (set-status loses its group_ids into session_no). The read-through cache is never used for reads.

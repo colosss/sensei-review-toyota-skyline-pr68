@@ -1,0 +1,43 @@
+C04 independent verification run (actor deepseek-c04-V)
+SHA 20bea22cf4a1cbc19634a984883ff52764ce9d6d
+
+Command (coordinator-approved, author test unmodified):
+  python3 scripts/review_pipeline.py run C04 --actor deepseek-c04-V --timeout 120 \
+    --artifact repro/C04/test_queue_identity.py --artifact repro/C04/README.md -- \
+    .venv/bin/python scripts/run_review_tests.py repro/C04/test_queue_identity.py -v --tb=short
+
+Receipt: scratch/pipeline/C04/runs/bea8f41e802c4a9d8bf6815da5027145.json
+Target exit: 1 (regression, expected for a reproduced defect)
+timed_out: false
+baseline_clean_after: true
+Input hashes:
+  repro/C04/test_queue_identity.py a54f9369dc84190841256cc88dacd215033c329b9792864ae5616da53a2401fb
+  repro/C04/README.md              41246f6dc5723039a952221b371a1fd6a99832c39e909f995972613ae29863e4
+
+Observed pytest result: 2 failed, 1 passed
+
+PASSED  test_unauthenticated_and_peer_sessions_cannot_withdraw_b
+FAILED  test_public_registration_of_another_identity_cannot_withdraw_b
+FAILED  test_public_registration_of_another_identity_cannot_shift_b
+
+Failure excerpts (stderr log, synthetic data only):
+
+  AssertionError: desired contract: an unproven identity must not change another
+  student's waiting record; actual: withdraw HTTP 200, entry status 'отозван'
+  assert (200 in (401, 403))
+
+  AssertionError: desired contract: an unproven identity must not reorder another
+  student's waiting record; actual: shift HTTP 200, position 1 -> 2
+  assert (200 in (401, 403))
+
+Requests from the run log:
+  POST /courses/review-c04/groups/C04-G/register            -> 200 (student B session issued)
+  POST /courses/review-c04/groups/C04-G/labs/1/queue/register -> 200 (setup, B waiting)
+  POST /courses/review-c04/groups/C04-G/register            -> 200 (anonymous claims B again)
+  POST /courses/review-c04/groups/C04-G/labs/1/queue/withdraw -> 200 (B's row becomes 'отозван')
+
+Control test in the same run:
+  withdraw without any cookie -> 401
+  genuine session A withdraw -> 404, B's row stays 'ждёт'
+
+No cookie or token values are printed by the test or this evidence.

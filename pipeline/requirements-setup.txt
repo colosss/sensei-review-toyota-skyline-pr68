@@ -1,0 +1,3 @@
+# Optional, only for bounded credential-backed smoke on Linux.
+# Application/test dependencies: source/requirements-dev.txt in an isolated venv.
+secretstorage==3.5.0

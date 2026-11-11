@@ -4,6 +4,8 @@
 
 Почему выбраны такие этапы и что взято из открытых проектов: [исследование](pipeline/RESEARCH.md). Границы работы и требования: [AGENT_TASK.md](AGENT_TASK.md), [протокол координатора](COORDINATION.md). `source/` остаётся неизменным.
 
+Для машины инициатора подготовлены профиль Zed, отдельный Python runtime и проверка DeepSeek tool calling: [текущее состояние настройки](pipeline/LOCAL_SETUP.md). Для тестов приложения используй `scripts/run_review_tests.py`, чтобы работать с отдельной закреплённой копией и Python network guard. Вход ChatGPT и native-делегирование проверяются отдельно.
+
 ## Схема
 
 ```mermaid

@@ -1,0 +1,18 @@
+{
+  "sha": "20bea22cf4a1cbc19634a984883ff52764ce9d6d",
+  "source_used": "/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/review/source",
+  "command": [
+    "/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/bin/python",
+    "-m",
+    "pytest",
+    "/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R02/test_R02.py",
+    "-q",
+    "-s",
+    "-p",
+    "no:cacheprovider",
+    "--tb=short"
+  ],
+  "cwd": "/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68",
+  "exit_code": 1,
+  "independently_verified": false
+}

@@ -1,0 +1,99 @@
+
+> courses-front@0.0.0 lint
+> eslint .
+
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/api/index.js
+  201:14  error  'e' is defined but never used  no-unused-vars
+  216:14  error  'e' is defined but never used  no-unused-vars
+  231:14  error  'e' is defined but never used  no-unused-vars
+  248:14  error  'e' is defined but never used  no-unused-vars
+  274:14  error  'e' is defined but never used  no-unused-vars
+  326:14  error  'e' is defined but never used  no-unused-vars
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/JoinLab/CreateTeamForm.jsx
+  21:34  error  'canCreate' is missing in props validation  react/prop-types
+  21:45  error  'countMax' is missing in props validation   react/prop-types
+  21:55  error  'isBusy' is missing in props validation     react/prop-types
+  21:63  error  'onCreate' is missing in props validation   react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/JoinLab/MyTeamCard.jsx
+  17:30  error  'team' is missing in props validation              react/prop-types
+  17:36  error  'sizeMax' is missing in props validation           react/prop-types
+  17:45  error  'isBusy' is missing in props validation            react/prop-types
+  17:53  error  'onRepairAccess' is missing in props validation    react/prop-types
+  19:51  error  'team.repo_url' is missing in props validation     react/prop-types
+  24:25  error  'team.title' is missing in props validation        react/prop-types
+  24:39  error  'team.slug' is missing in props validation         react/prop-types
+  27:50  error  'team.size' is missing in props validation         react/prop-types
+  28:49  error  'team.size' is missing in props validation         react/prop-types
+  32:13  error  'team.description' is missing in props validation  react/prop-types
+  32:45  error  'team.description' is missing in props validation  react/prop-types
+  35:15  error  'team.members' is missing in props validation      react/prop-types
+  35:23  error  'team.members.map' is missing in props validation  react/prop-types
+  38:15  error  'team.pending' is missing in props validation      react/prop-types
+  38:23  error  'team.pending.map' is missing in props validation  react/prop-types
+  40:35  error  'team.expired' is missing in props validation      react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/JoinLab/TeamList.jsx
+  21:28  error  'teams' is missing in props validation         react/prop-types
+  21:35  error  'sizeMax' is missing in props validation       react/prop-types
+  21:44  error  'myTeam' is missing in props validation        react/prop-types
+  21:52  error  'busySlug' is missing in props validation      react/prop-types
+  21:62  error  'onJoin' is missing in props validation        react/prop-types
+  24:14  error  'teams.length' is missing in props validation  react/prop-types
+  30:14  error  'teams.map' is missing in props validation     react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/admin/AdminLogin.jsx
+  29:12  error  'err' is defined but never used  no-unused-vars
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/admin/LabList/BulkGradeDialog.jsx
+   63:35   error  'courseId' is missing in props validation        react/prop-types
+   63:45   error  'lab' is missing in props validation             react/prop-types
+   63:50   error  'onClose' is missing in props validation         react/prop-types
+   63:59   error  'onError' is missing in props validation         react/prop-types
+   68:48   error  'lab.name_file' is missing in props validation   react/prop-types
+  111:110  error  'lab.id' is missing in props validation          react/prop-types
+  159:58   error  'lab.short_name' is missing in props validation  react/prop-types
+  183:28   error  'lab.files' is missing in props validation       react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/admin/LabList/index.jsx
+  96:27  error  'courseId' is missing in props validation  react/prop-types
+  96:37  error  'onBack' is missing in props validation    react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/admin/ProtectedRoute.jsx
+  4:34  error  'children' is missing in props validation  react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/breadcrumb/index.jsx
+  5:30  error  'courseId' is missing in props validation  react/prop-types
+  5:40  error  'groupId' is missing in props validation   react/prop-types
+  5:49  error  'labId' is missing in props validation     react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/course-list/index.jsx
+  35:30  error  'onSelectCourse' is missing in props validation  react/prop-types
+  35:46  error  'isAdmin' is missing in props validation         react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/group-list/index.jsx
+  10:29  error  'courseId' is missing in props validation       react/prop-types
+  10:39  error  'onSelectGroup' is missing in props validation  react/prop-types
+  10:54  error  'onBack' is missing in props validation         react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/lab-list/index.jsx
+  15:27  error  'courseId' is missing in props validation     react/prop-types
+  15:37  error  'groupId' is missing in props validation      react/prop-types
+  15:46  error  'onSelectLab' is missing in props validation  react/prop-types
+  15:59  error  'onBack' is missing in props validation       react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/components/registration-form/index.jsx
+   5:8   error  'Snackbar' is defined but never used       no-unused-vars
+   6:8   error  'Alert' is defined but never used          no-unused-vars
+  10:36  error  'courseId' is missing in props validation  react/prop-types
+  10:46  error  'groupId' is missing in props validation   react/prop-types
+  10:55  error  'labId' is missing in props validation     react/prop-types
+  10:62  error  'onBack' is missing in props validation    react/prop-types
+
+/Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/base-frontend/frontend/courses-front/src/main.jsx
+  1:10  error  'StrictMode' is defined but never used  no-unused-vars
+
+✖ 64 problems (64 errors, 0 warnings)
+

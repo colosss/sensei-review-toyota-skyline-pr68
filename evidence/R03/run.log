@@ -1,0 +1,71 @@
+Validating course index...
+✅ Course index validated successfully (11 courses)
+✅ Course logos available at /courses/logos
+two lab registrations: 200 {'position': 1, 'queue_size': 1} 200 {'position': 1, 'queue_size': 1}
+F
+=================================== FAILURES ===================================
+__________________ test_R03_only_one_active_entry_across_labs __________________
+/Users/kirill/Dev/Projects/sensei-review-toyota-skyline-pr68/repro/R03/test_R03.py:16: in test_R03_only_one_active_entry_across_labs
+    assert second.status_code == 409, "one student cannot wait for two labs simultaneously"
+E   AssertionError: one student cannot wait for two labs simultaneously
+E   assert 200 == 409
+E    +  where 200 = <Response [200 OK]>.status_code
+------------------------------ Captured log call -------------------------------
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab1-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+WARNING  grading.bulk:bulk.py:339 Update rejected: cell already contains 'v'
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.sheets_client:sheets_client.py:401 Using decimal separator '.' for locale en_US
+INFO     grading.bulk:bulk.py:216 Evaluating repository: synthetic-org/lab2-alice
+INFO     grading.grader:grader.py:487 Total check runs found: 1
+INFO     grading.grader:grader.py:493 CI jobs configured in lab config: ['test']
+INFO     grading.grader:grader.py:498 Relevant check runs after filtering: 1
+INFO     grading.grader:grader.py:500   Relevant job: test (conclusion: success)
+INFO     grading.grader:grader.py:579 Successful runs for TASKID extraction: 1
+INFO     grading.grader:grader.py:581   Success job: test
+WARNING  grading.bulk:bulk.py:339 Update rejected: cell already contains 'v'
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/courses/review/groups/G1/labs/2/queue/register "HTTP/1.1 200 OK"
+=============================== warnings summary ===============================
+../../../Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/slowapi/extension.py:720: 43 warnings
+  /Users/kirill/Documents/Codex/2026-11-11/toyota-skyline-67-suaios-suaios-65-14/work/venv/lib/python3.14/site-packages/slowapi/extension.py:720: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED repro/R03/test_R03.py::test_R03_only_one_active_entry_across_labs - As...
+1 failed, 44 warnings in 0.03s
+2026-11-11 21:15:40 - main - INFO - Logging initialized. Log file: /var/folders/v3/zsx4zfhs2hg1m5flyn6zp1200000gn/T/pr68-review-my0vydiq/labgrader.log
+2026-11-11 21:15:40 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:40 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:40 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab1-alice
+2026-11-11 21:15:40 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:40 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:40 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:40 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:40 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:40 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:40 - grading.bulk - WARNING - Update rejected: cell already contains 'v'
+2026-11-11 21:15:40 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/1/queue/register "HTTP/1.1 200 OK"
+2026-11-11 21:15:40 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:40 - grading.sheets_client - INFO - Using decimal separator '.' for locale en_US
+2026-11-11 21:15:40 - grading.bulk - INFO - Evaluating repository: synthetic-org/lab2-alice
+2026-11-11 21:15:40 - grading.grader - INFO - Total check runs found: 1
+2026-11-11 21:15:40 - grading.grader - INFO - CI jobs configured in lab config: ['test']
+2026-11-11 21:15:40 - grading.grader - INFO - Relevant check runs after filtering: 1
+2026-11-11 21:15:40 - grading.grader - INFO -   Relevant job: test (conclusion: success)
+2026-11-11 21:15:40 - grading.grader - INFO - Successful runs for TASKID extraction: 1
+2026-11-11 21:15:40 - grading.grader - INFO -   Success job: test
+2026-11-11 21:15:40 - grading.bulk - WARNING - Update rejected: cell already contains 'v'
+2026-11-11 21:15:40 - httpx - INFO - HTTP Request: POST http://testserver/courses/review/groups/G1/labs/2/queue/register "HTTP/1.1 200 OK"

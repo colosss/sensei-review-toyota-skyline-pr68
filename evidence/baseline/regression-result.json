@@ -1,0 +1,6 @@
+{
+  "exit_code": 1,
+  "summary": "9 failed, 9 passed, 44 warnings in 0.14s",
+  "expected_failures": 9,
+  "passing_controls": 9
+}

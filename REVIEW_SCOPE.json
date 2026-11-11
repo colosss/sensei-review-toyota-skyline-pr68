@@ -1,0 +1,12 @@
+{
+  "reviewer_team": "sensei-mcp",
+  "reviewed_team": "toyota-skyline",
+  "pull_request": "https://github.com/markpolyak/lab_grader_web/pull/68",
+  "source_repository": "https://github.com/Asteruss/lab_grader_web.git",
+  "base_commit": "eef98bb373c71e9e4e7df4258e1fe5b4b4c5ac39",
+  "pinned_commits": {
+    "source": "20bea22cf4a1cbc19634a984883ff52764ce9d6d",
+    "source/vendor/suai-schedule-parser": "6ee99733d766ab6f746403996a7a4bef28d6443c"
+  },
+  "organizer_freeze_verified": false
+}

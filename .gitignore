@@ -1,0 +1,20 @@
+# Local environments and secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+credentials*.json
+service-account*.json
+*.pem
+*.key
+# Unprocessed evidence stays local
+scratch/
+evidence/raw/
+.DS_Store
